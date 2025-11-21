@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curso de Capacitación - Inspectores Reconquista</title>
+    
+    <!-- LIBRERÍAS EXTERNAS (Tailwind + React) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- 1. COLECCIÓN DE ÍCONOS ---
+        const Icons = {
+            Shield: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+            UserCheck: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>,
+            BookOpen: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+            CheckCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+            Users: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+            Lock: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+            LogOut: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+            ArrowRight: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>,
+            ChevronDown: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>,
+            ChevronUp: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>,
+            GraduationCap: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
+            FileText: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
+            Video: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>,
+            Monitor: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
+            Calendar: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        };
+
+        // --- 2. DATOS DEL CURSO ---
+        const COURSE_DATA = [
+          {
+            id: 1,
+            title: "MÓDULO 1: Marco Legal y Ético",
+            description: "Principios fundamentales del Poder de Policía y Ética Pública.",
+            topics: [
+              { id: "1.1", title: "Principios Generales del Poder de Policía", content: "Análisis de la Constitución Nacional, Provincial y el marco normativo que otorga la facultad de control al municipio.", resources: [{ type: "pdf", label: "Constitución Provincial (Extracto)" }, { type: "video", label: "Clase: Concepto de Poder de Policía" }] },
+              { id: "1.2", title: "Ética Pública", content: "Estudio de la Ley de Ética Pública de la Provincia de Santa Fe. Responsabilidades del funcionario y transparencia.", resources: [{ type: "pdf", label: "Ley de Ética Pública" }, { type: "presentation", label: "Presentación: Valores en la Administración" }] }
+            ]
+          },
+          {
+            id: 2,
+            title: "MÓDULO 2: Tránsito y Seguridad Vial",
+            description: "Normativas de tránsito, ordenanzas locales y leyes nacionales.",
+            topics: [
+              { id: "2.1", title: "Código Municipal de Tránsito", content: "Ordenanza 4823/03. Definiciones de calzada, acera, zona peatonal y prioridades de paso.", resources: [{ type: "video", label: "Explicativo Ordenanza 4823/03 (NotebookLM)" }, { type: "link", label: "Consulta Web Ordenanza Oficial" }] },
+              { id: "2.2", title: "Leyes de Adhesión", content: "Marco de la Ley Nacional 24449 y Ley Provincial 13169. Articulación con la legislación local.", resources: [{ type: "pdf", label: "Comparativa Ley Nacional vs Local" }] },
+              { id: "2.3", title: "Estacionamiento Medido", content: "Regulaciones sobre el sistema de parquímetro. Zonas permitidas, horarios y exenciones.", resources: [{ type: "image", label: "Mapa de Zonas de Estacionamiento" }] }
+            ]
+          },
+          {
+            id: 3,
+            title: "MÓDULO 3: Espacios Públicos",
+            description: "Regulación y uso del dominio público municipal.",
+            topics: [
+              { id: "3.1", title: "Reglamento de Uso", content: "Ordenanza 4877/03. Normas de convivencia y cuidado del mobiliario urbano.", resources: [{ type: "pdf", label: "Ordenanza 4877/03 Texto Completo" }] },
+              { id: "3.2", title: "Venta Ambulante", content: "Ordenanzas especiales sobre actividad comercial en la vía pública.", resources: [{ type: "presentation", label: "Guía de Procedimiento" }] }
+            ]
+          },
+          {
+            id: 4,
+            title: "MÓDULO 4: Régimen de Faltas",
+            description: "Código de Faltas y tipificación de infracciones.",
+            topics: [
+              { id: "4.1", title: "Código de Faltas - Parte General", content: "Ordenanza 4909/03. Conceptos de falta, imputabilidad y sanciones.", resources: [{ type: "pdf", label: "Código de Faltas (Parte General)" }] },
+              { id: "4.2", title: "Código de Faltas - Parte Especial", content: "Tipificación específica en Tránsito, Espacio Público y Medio Ambiente.", resources: [{ type: "video", label: "Casos Prácticos: Labrado de Actas" }] }
+            ]
+          }
+        ];
+
+        const ResourceIcon = ({ type }) => {
+            const style = {
+                pdf: "text-red-500", video: "text-red-600", presentation: "text-orange-500", link: "text-blue-500", image: "text-purple-500"
+            }[type] || "text-gray-500";
+            
+            const IconComp = {
+                pdf: Icons.FileText, video: Icons.Video, presentation: Icons.Monitor, link: Icons.BookOpen, image: Icons.BookOpen
+            }[type] || Icons.FileText;
+
+            return <div className={style}><IconComp size={16} /></div>;
+        };
+
+        // --- 3. COMPONENTE PRINCIPAL ---
+        const App = () => {
+            const [view, setView] = useState('landing');
+            const [user, setUser] = useState(null);
+            const [activeModule, setActiveModule] = useState(null);
+            const [expandedTopic, setExpandedTopic] = useState(null);
+            const [progress, setProgress] = useState(0);
+            const [dashboardTab, setDashboardTab] = useState('modules'); // 'modules' | 'info'
+
+            // Cargar usuario guardado
+            useEffect(() => {
+                const savedUser = localStorage.getItem('cursoApp_user_v3');
+                if (savedUser) {
+                    setUser(JSON.parse(savedUser));
+                }
+            }, []);
+
+            // SISTEMA DE ENRUTAMIENTO SEGURO (Esto corrige el error de redirección)
+            useEffect(() => {
+                if (user && user.status === 'active') {
+                    // Solo redirigir si estamos en una vista pública
+                    if (['landing', 'register', 'pending'].includes(view)) {
+                        setView('dashboard');
+                    }
+                }
+            }, [user, view]);
+
+            const handleRegister = (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const newUser = {
+                    name: formData.get('nombre'),
+                    email: formData.get('email'),
+                    area: formData.get('area'),
+                    status: 'pending',
+                };
+                localStorage.setItem('cursoApp_user_v3', JSON.stringify(newUser));
+                setUser(newUser);
+                setView('pending');
+            };
+
+            const simulateAdminApproval = () => {
+                const approvedUser = { ...user, status: 'active' };
+                localStorage.setItem('cursoApp_user_v3', JSON.stringify(approvedUser));
+                setUser(approvedUser);
+                // El useEffect se encargará de la redirección al dashboard
+            };
+
+            const handleLogout = () => {
+                localStorage.removeItem('cursoApp_user_v3');
+                setUser(null);
+                setView('landing');
+                setDashboardTab('modules');
+            };
+
+            // --- VISTAS DE LA APLICACIÓN ---
+
+            if (view === 'landing') return (
+                <div className="animate-fade-in">
+                    <header className="bg-gradient-to-r from-blue-900 to-blue-800 text-white py-16 px-4 text-center relative overflow-hidden">
+                        <div className="max-w-4xl mx-auto relative z-10">
+                            <div className="inline-block bg-blue-700/50 px-4 py-1 rounded-full text-sm mb-4 border border-blue-500">Municipalidad de Reconquista</div>
+                            <h1 className="text-4xl md:text-6xl font-extrabold mb-6">CURSO DE CAPACITACIÓN <br/> PARA INSPECTORES</h1>
+                            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">Plataforma oficial de formación continua.</p>
+                            <div className="flex justify-center">
+                                <button onClick={() => setView('register')} className="bg-yellow-500 hover:bg-yellow-400 text-blue-900 font-bold py-3 px-8 rounded-lg shadow-lg flex items-center gap-2 transition transform hover:scale-105">
+                                    <Icons.UserCheck /> Inscripción 2026
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+                    <section className="py-12 bg-white border-b">
+                        <div className="max-w-5xl mx-auto px-4">
+                            <h3 className="text-center text-gray-500 font-bold uppercase text-xs mb-8 tracking-widest">Dirección y Organización</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                                {[{name:"Lic. Nicolás Sandrigo", role:"Secretaría de Control Público"}, {name:"Dra. Soledad Cáceres", role:"Juzgado Municipal de Faltas"}, {name:"Dr. Ricardo Franco", role:"Agencia Gubernamental de Control"}].map((p,i)=> (
+                                    <div key={i} className="p-4 bg-gray-50 rounded border"><p className="font-bold text-blue-900">{p.name}</p><p className="text-xs text-gray-600">{p.role}</p></div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            );
+
+            if (view === 'register') return (
+                <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 animate-fade-in">
+                    <div className="bg-white w-full max-w-md rounded-xl shadow-lg overflow-hidden">
+                        <div className="bg-blue-900 p-6 text-white"><h2 className="text-xl font-bold flex items-center gap-2"><Icons.UserCheck/> Inscripción 2026</h2></div>
+                        <form onSubmit={handleRegister} className="p-6 space-y-4">
+                            <div><label className="block text-sm font-medium text-gray-700">Nombre Completo</label><input required name="nombre" className="w-full mt-1 p-2 border rounded" placeholder="Ej: Juan Pérez" /></div>
+                            <div><label className="block text-sm font-medium text-gray-700">Correo Oficial</label><input required name="email" type="email" className="w-full mt-1 p-2 border rounded" placeholder="correo@reconquista.gov.ar" /></div>
+                            <div><label className="block text-sm font-medium text-gray-700">Área</label><select name="area" className="w-full mt-1 p-2 border rounded"><option>Seguridad Vial</option><option>Fiscalización</option><option>Seguridad General</option></select></div>
+                            <button type="submit" className="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 mt-4">Enviar Solicitud</button>
+                            <button type="button" onClick={() => setView('landing')} className="w-full text-gray-500 text-sm mt-2">Cancelar</button>
+                        </form>
+                    </div>
+                </div>
+            );
+
+            if (view === 'pending') return (
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4 animate-fade-in">
+                    <div className="max-w-lg w-full bg-white rounded-xl shadow p-8 text-center">
+                        <div className="text-yellow-500 mx-auto mb-4 flex justify-center"><Icons.Lock /></div>
+                        <h2 className="text-xl font-bold text-gray-800 mb-2">Solicitud Pendiente</h2>
+                        <p className="text-gray-600 mb-6 text-sm">Hola <strong>{user?.name}</strong>. Tu usuario debe ser validado por un administrador.</p>
+                        <div className="bg-red-50 border border-red-200 p-4 rounded text-left mb-4">
+                            <p className="text-xs font-bold text-red-600 uppercase mb-2">Zona de Demo (Admin)</p>
+                            <button onClick={simulateAdminApproval} className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded text-sm flex items-center justify-center gap-2"><Icons.CheckCircle /> SIMULAR APROBACIÓN</button>
+                        </div>
+                        <button onClick={handleLogout} className="text-blue-600 text-sm underline">Salir</button>
+                    </div>
+                </div>
+            );
+
+            // LAYOUT DEL CAMPUS (Header común)
+            const CourseLayout = ({children}) => (
+                <div className="min-h-screen bg-gray-100 flex flex-col font-sans animate-fade-in">
+                    <nav className="bg-white shadow-sm border-b sticky top-0 z-20">
+                        <div className="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
+                            <div className="flex items-center gap-2 font-bold text-blue-900"><Icons.Shield /> <span>Campus Virtual</span></div>
+                            <div className="flex items-center gap-3">
+                                <span className="text-sm font-semibold hidden sm:block text-gray-700">{user?.name}</span>
+                                <button onClick={handleLogout} className="text-gray-400 hover:text-red-600 transition"><Icons.LogOut /></button>
+                            </div>
+                        </div>
+                    </nav>
+                    <main className="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6">{children}</main>
+                </div>
+            );
+
+            if (view === 'dashboard') return (
+                <CourseLayout>
+                    <div className="mb-6">
+                        <h1 className="text-2xl font-bold text-gray-800 mb-4">Panel del Alumno</h1>
+                        <div className="flex border-b border-gray-300 space-x-6">
+                            <button type="button" onClick={() => setDashboardTab('modules')} className={`pb-2 text-sm font-bold transition-colors border-b-2 ${dashboardTab === 'modules' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Mis Cursos</button>
+                            <button type="button" onClick={() => setDashboardTab('info')} className={`pb-2 text-sm font-bold transition-colors border-b-2 ${dashboardTab === 'info' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Información del Curso</button>
+                        </div>
+                    </div>
+
+                    {dashboardTab === 'info' ? (
+                        <div className="animate-fade-in space-y-6">
+                            {/* Bienvenida Intendente */}
+                            <div className="bg-gradient-to-br from-blue-800 to-blue-600 text-white rounded-xl p-6 md:p-8 shadow-lg flex flex-col md:flex-row items-center gap-6">
+                                <div className="w-20 h-20 bg-blue-300 rounded-full flex-shrink-0 border-4 border-blue-200 overflow-hidden bg-gray-200 flex items-center justify-center text-blue-800 font-bold">AV</div>
+                                <div className="flex-1 text-center md:text-left">
+                                    <h2 className="text-2xl font-bold mb-2">"Bienvenidos a la profesionalización"</h2>
+                                    <p className="text-blue-100 italic mb-2">"Queremos inspectores orgullosos de su función. Esta herramienta es para ustedes, para que cuenten con todo el respaldo teórico y técnico."</p>
+                                    <p className="text-xs font-bold text-blue-200 uppercase tracking-wider">Dr. Amadeo Enrique Vallejos — Intendente</p>
+                                </div>
+                            </div>
+                            
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div className="bg-white p-6 rounded-xl shadow-sm border">
+                                    <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2"><span className="text-blue-600"><Icons.Users/></span> Destinatarios</h3>
+                                    <p className="text-sm text-gray-600">Agentes de Seguridad Vial, Fiscalización Externa y Seguridad. Contenido adaptado a todos los niveles de formación.</p>
+                                </div>
+                                <div className="bg-white p-6 rounded-xl shadow-sm border">
+                                    <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2"><span className="text-blue-600"><Icons.Calendar/></span> Modalidad</h3>
+                                    <p className="text-sm text-gray-600">Formato híbrido y asincrónico. Disponible todo el año 2026. Estudia a tu propio ritmo.</p>
+                                </div>
+                            </div>
+
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+                                <h3 className="font-bold text-gray-800 mb-2 flex items-center gap-2"><Icons.GraduationCap/> Evaluación</h3>
+                                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+                                    <li><strong>Autoevaluaciones:</strong> Al final de cada módulo (No eliminatorias).</li>
+                                    <li><strong>Examen Final:</strong> Requisito para certificación (3 intentos anuales).</li>
+                                </ul>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="animate-fade-in">
+                             <div className="bg-white p-6 rounded-lg shadow-sm mb-6 border">
+                                <div className="flex justify-between text-sm mb-2"><span className="font-bold text-gray-700">Progreso</span><span className="font-bold text-blue-600">{progress}%</span></div>
+                                <div className="w-full bg-gray-200 rounded-full h-2"><div className="bg-blue-600 h-2 rounded-full transition-all duration-1000" style={{width: `${progress}%`}}></div></div>
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                {COURSE_DATA.map((mod) => (
+                                    <div key={mod.id} className="bg-white p-5 rounded-lg shadow-sm border hover:shadow-md transition flex flex-col">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">MÓDULO 0{mod.id}</span>
+                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Disponible</span>
+                                        </div>
+                                        <h3 className="font-bold text-lg mb-2 text-gray-800">{mod.title}</h3>
+                                        <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-1">{mod.description}</p>
+                                        <button onClick={() => {setActiveModule(mod.id); setView('module'); setExpandedTopic(null);}} className="text-blue-600 font-bold text-sm flex items-center gap-1 hover:text-blue-800 mt-auto">Ingresar <Icons.ArrowRight/></button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </CourseLayout>
+            );
+
+            if (view === 'module') {
+                const mod = COURSE_DATA.find(m => m.id === activeModule);
+                return (
+                    <CourseLayout>
+                        <button onClick={() => setView('dashboard')} className="mb-4 text-gray-500 hover:text-blue-600 text-sm flex items-center gap-1"><div className="rotate-180 transform inline-block"><Icons.ArrowRight /></div> Volver al Panel</button>
+                        <div className="bg-white rounded-xl shadow overflow-hidden animate-fade-in">
+                            <div className="bg-blue-900 text-white p-6">
+                                <span className="text-xs font-bold text-blue-300 tracking-wider">MÓDULO {mod.id}</span>
+                                <h2 className="text-2xl font-bold mt-1">{mod.title}</h2>
+                                <p className="text-blue-100 mt-2 text-sm">{mod.description}</p>
+                            </div>
+                            <div className="divide-y divide-gray-100">
+                                {mod.topics.map(topic => {
+                                    const isOpen = expandedTopic === topic.id;
+                                    return (
+                                        <div key={topic.id} className={`transition-colors ${isOpen ? "bg-blue-50/50" : "bg-white hover:bg-gray-50"}`}>
+                                            <button onClick={() => setExpandedTopic(isOpen ? null : topic.id)} className="w-full px-6 py-4 flex items-center justify-between text-left">
+                                                <span className={`font-semibold ${isOpen ? 'text-blue-800' : 'text-gray-700'}`}>{topic.id} {topic.title}</span>
+                                                <div className={isOpen ? "text-blue-600" : "text-gray-400"}>{isOpen ? <Icons.ChevronUp /> : <Icons.ChevronDown />}</div>
+                                            </button>
+                                            {isOpen && (
+                                                <div className="px-6 pb-6 pl-10 text-sm animate-fade-in">
+                                                    <p className="text-gray-700 mb-4 leading-relaxed text-justify">{topic.content}</p>
+                                                    <div className="bg-white border border-gray-200 p-3 rounded-lg">
+                                                        <p className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Material de Estudio</p>
+                                                        <div className="space-y-2">
+                                                            {topic.resources.map((res, idx) => (
+                                                                <div key={idx} className="flex items-center gap-2 text-blue-700 cursor-pointer hover:underline p-1 rounded hover:bg-gray-50">
+                                                                    <ResourceIcon type={res.type}/> <span className="font-medium">{res.label}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div className="p-6 bg-gray-50 text-center border-t">
+                                <button className="bg-white border-2 border-blue-600 text-blue-600 px-6 py-2 rounded-full text-sm font-bold hover:bg-blue-50 flex items-center justify-center gap-2 mx-auto">
+                                    <Icons.GraduationCap /> Realizar Autoevaluación
+                                </button>
+                            </div>
+                        </div>
+                    </CourseLayout>
+                );
+            }
+
+            return <div className="flex items-center justify-center h-screen">Cargando sistema...</div>;
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
