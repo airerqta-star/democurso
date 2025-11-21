@@ -10,12 +10,24 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Librería para efecto de confeti al aprobar -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
         .animate-fade-in { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Estilos para Radio Buttons personalizados */
+        .radio-label { cursor: pointer; transition: all 0.2s; }
+        .radio-input { display: none; }
+        .radio-box {
+            border: 2px solid #E5E7EB; border-radius: 0.5rem; padding: 1rem; display: flex; align-items: center; gap: 0.5rem;
+        }
+        .radio-input:checked + .radio-box {
+            border-color: #2563EB; background-color: #EFF6FF; color: #1E40AF; font-weight: 600;
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -30,6 +42,7 @@
             UserCheck: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>,
             BookOpen: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
             CheckCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+            XCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>,
             Users: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
             Lock: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
             LogOut: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
@@ -51,7 +64,7 @@
             description: "Principios fundamentales del Poder de Policía y Ética Pública.",
             topics: [
               { id: "1.1", title: "Principios Generales del Poder de Policía", content: "Análisis de la Constitución Nacional, Provincial y el marco normativo que otorga la facultad de control al municipio.", resources: [{ type: "pdf", label: "Constitución Provincial (Extracto)" }, { type: "video", label: "Clase: Concepto de Poder de Policía" }] },
-              { id: "1.2", title: "Ética Pública", content: "Estudio de la Ley de Ética Pública de la Provincia de Santa Fe. Responsabilidades del funcionario y transparencia.", resources: [{ type: "pdf", label: "Ley de Ética Pública" }, { type: "presentation", label: "Presentación: Valores en la Administración" }] }
+              { id: "1.2", title: "Ética Pública", content: "Estudio de la Ley de Ética Pública de la Provincia de Santa Fe (Ley 13230). Responsabilidades del funcionario y transparencia.", resources: [{ type: "pdf", label: "Ley de Ética Pública" }, { type: "presentation", label: "Presentación: Valores en la Administración" }] }
             ]
           },
           {
@@ -84,6 +97,15 @@
           }
         ];
 
+        // --- DATOS DEL EXAMEN (MÓDULO 1) ---
+        const QUIZ_MOD_1 = [
+            { id: 1, question: "La Ley de Ética Pública se aplica solo a funcionarios de alto rango elegidos por voto popular.", correct: false },
+            { id: 2, question: "Es un deber ético abstenerse de usar información oficial para beneficios privados.", correct: true },
+            { id: 3, question: "Un funcionario puede ser proveedor del Estado si el precio es conveniente.", correct: false },
+            { id: 4, question: "La Comisión Provincial de Ética Pública depende jerárquicamente del Poder Ejecutivo.", correct: false },
+            { id: 5, question: "Existen excepciones reglamentadas a la prohibición de recibir obsequios (ej. cortesía diplomática).", correct: true }
+        ];
+
         const ResourceIcon = ({ type }) => {
             const style = {
                 pdf: "text-red-500", video: "text-red-600", presentation: "text-orange-500", link: "text-blue-500", image: "text-purple-500"
@@ -103,20 +125,26 @@
             const [activeModule, setActiveModule] = useState(null);
             const [expandedTopic, setExpandedTopic] = useState(null);
             const [progress, setProgress] = useState(0);
-            const [dashboardTab, setDashboardTab] = useState('modules'); // 'modules' | 'info'
+            const [dashboardTab, setDashboardTab] = useState('modules');
+            
+            // Estados del Quiz
+            const [quizAnswers, setQuizAnswers] = useState({});
+            const [quizSubmitted, setQuizSubmitted] = useState(false);
+            const [quizScore, setQuizScore] = useState(0);
 
             // Cargar usuario guardado
             useEffect(() => {
-                const savedUser = localStorage.getItem('cursoApp_user_v3');
+                const savedUser = localStorage.getItem('cursoApp_user_v4');
                 if (savedUser) {
-                    setUser(JSON.parse(savedUser));
+                    const u = JSON.parse(savedUser);
+                    setUser(u);
+                    if(u.progress) setProgress(u.progress);
                 }
             }, []);
 
-            // SISTEMA DE ENRUTAMIENTO SEGURO (Esto corrige el error de redirección)
+            // Enrutamiento Seguro
             useEffect(() => {
                 if (user && user.status === 'active') {
-                    // Solo redirigir si estamos en una vista pública
                     if (['landing', 'register', 'pending'].includes(view)) {
                         setView('dashboard');
                     }
@@ -131,24 +159,59 @@
                     email: formData.get('email'),
                     area: formData.get('area'),
                     status: 'pending',
+                    progress: 0
                 };
-                localStorage.setItem('cursoApp_user_v3', JSON.stringify(newUser));
+                localStorage.setItem('cursoApp_user_v4', JSON.stringify(newUser));
                 setUser(newUser);
                 setView('pending');
             };
 
             const simulateAdminApproval = () => {
                 const approvedUser = { ...user, status: 'active' };
-                localStorage.setItem('cursoApp_user_v3', JSON.stringify(approvedUser));
+                localStorage.setItem('cursoApp_user_v4', JSON.stringify(approvedUser));
                 setUser(approvedUser);
-                // El useEffect se encargará de la redirección al dashboard
             };
 
             const handleLogout = () => {
-                localStorage.removeItem('cursoApp_user_v3');
+                localStorage.removeItem('cursoApp_user_v4');
                 setUser(null);
                 setView('landing');
                 setDashboardTab('modules');
+                setQuizAnswers({});
+                setQuizSubmitted(false);
+                setProgress(0);
+            };
+
+            const updateProgress = (newVal) => {
+                const p = Math.min(newVal, 100);
+                setProgress(p);
+                const updatedUser = { ...user, progress: p };
+                setUser(updatedUser);
+                localStorage.setItem('cursoApp_user_v4', JSON.stringify(updatedUser));
+            }
+
+            // LÓGICA DEL EXAMEN
+            const handleQuizOptionChange = (qId, val) => {
+                if(quizSubmitted) return;
+                setQuizAnswers(prev => ({...prev, [qId]: val}));
+            };
+
+            const submitQuiz = () => {
+                let score = 0;
+                QUIZ_MOD_1.forEach(q => {
+                    if(quizAnswers[q.id] === q.correct) score++;
+                });
+                setQuizScore(score);
+                setQuizSubmitted(true);
+
+                if(score >= 3) {
+                    confetti({
+                        particleCount: 150,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                    if(progress < 25) updateProgress(progress + 25);
+                }
             };
 
             // --- VISTAS DE LA APLICACIÓN ---
@@ -210,7 +273,7 @@
                 </div>
             );
 
-            // LAYOUT DEL CAMPUS (Header común)
+            // LAYOUT DEL CAMPUS
             const CourseLayout = ({children}) => (
                 <div className="min-h-screen bg-gray-100 flex flex-col font-sans animate-fade-in">
                     <nav className="bg-white shadow-sm border-b sticky top-0 z-20">
@@ -226,6 +289,76 @@
                 </div>
             );
 
+            if (view === 'quiz') {
+                return (
+                    <CourseLayout>
+                         <button onClick={() => setView('module')} className="mb-4 text-gray-500 hover:text-blue-600 text-sm flex items-center gap-1"><div className="rotate-180 transform inline-block"><Icons.ArrowRight /></div> Volver al Módulo</button>
+                         <div className="bg-white rounded-xl shadow-lg overflow-hidden max-w-3xl mx-auto">
+                            <div className="bg-blue-900 text-white p-6">
+                                <h2 className="text-2xl font-bold">Autoevaluación: Ética Pública</h2>
+                                <p className="text-blue-200 text-sm mt-1">Responde Verdadero o Falso. Aprueba con 3/5.</p>
+                            </div>
+                            <div className="p-6 space-y-6">
+                                {QUIZ_MOD_1.map((q, idx) => {
+                                    const userAnswer = quizAnswers[q.id];
+                                    const isCorrect = userAnswer === q.correct;
+                                    
+                                    return (
+                                        <div key={q.id} className="border-b border-gray-100 pb-6 last:border-0 last:pb-0">
+                                            <p className="font-semibold text-gray-800 mb-3">{idx + 1}. {q.question}</p>
+                                            <div className="flex gap-4">
+                                                <label className="radio-label flex-1">
+                                                    <input type="radio" name={`q-${q.id}`} className="radio-input" 
+                                                        checked={userAnswer === true} 
+                                                        onChange={() => handleQuizOptionChange(q.id, true)} 
+                                                        disabled={quizSubmitted}
+                                                    />
+                                                    <div className={`radio-box justify-center ${quizSubmitted && q.correct === true ? 'bg-green-50 border-green-500 text-green-700' : ''} ${quizSubmitted && userAnswer === true && !isCorrect ? 'bg-red-50 border-red-500 text-red-700' : ''}`}>
+                                                        Verdadero
+                                                    </div>
+                                                </label>
+                                                <label className="radio-label flex-1">
+                                                    <input type="radio" name={`q-${q.id}`} className="radio-input" 
+                                                        checked={userAnswer === false} 
+                                                        onChange={() => handleQuizOptionChange(q.id, false)} 
+                                                        disabled={quizSubmitted}
+                                                    />
+                                                    <div className={`radio-box justify-center ${quizSubmitted && q.correct === false ? 'bg-green-50 border-green-500 text-green-700' : ''} ${quizSubmitted && userAnswer === false && !isCorrect ? 'bg-red-50 border-red-500 text-red-700' : ''}`}>
+                                                        Falso
+                                                    </div>
+                                                </label>
+                                            </div>
+                                            {quizSubmitted && !isCorrect && (
+                                                <p className="text-xs text-red-600 mt-2 font-bold">Respuesta Incorrecta</p>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div className="p-6 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+                                {quizSubmitted ? (
+                                    <div className="flex-1 flex items-center justify-between">
+                                        <div>
+                                            <p className="font-bold text-xl">Tu Calificación: <span className={quizScore >= 3 ? "text-green-600" : "text-red-600"}>{quizScore}/5</span></p>
+                                            <p className="text-sm text-gray-500">{quizScore >= 3 ? "¡Aprobado! Tu progreso ha sido actualizado." : "Inténtalo nuevamente."}</p>
+                                        </div>
+                                        <button onClick={() => setView('dashboard')} className="bg-blue-600 text-white px-6 py-2 rounded font-bold hover:bg-blue-700">Volver al Campus</button>
+                                    </div>
+                                ) : (
+                                    <button 
+                                        onClick={submitQuiz} 
+                                        disabled={Object.keys(quizAnswers).length < 5}
+                                        className="w-full bg-blue-600 text-white py-3 rounded font-bold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                                    >
+                                        Enviar Examen
+                                    </button>
+                                )}
+                            </div>
+                         </div>
+                    </CourseLayout>
+                );
+            }
+
             if (view === 'dashboard') return (
                 <CourseLayout>
                     <div className="mb-6">
@@ -238,7 +371,6 @@
 
                     {dashboardTab === 'info' ? (
                         <div className="animate-fade-in space-y-6">
-                            {/* Bienvenida Intendente */}
                             <div className="bg-gradient-to-br from-blue-800 to-blue-600 text-white rounded-xl p-6 md:p-8 shadow-lg flex flex-col md:flex-row items-center gap-6">
                                 <div className="w-20 h-20 bg-blue-300 rounded-full flex-shrink-0 border-4 border-blue-200 overflow-hidden bg-gray-200 flex items-center justify-center text-blue-800 font-bold">AV</div>
                                 <div className="flex-1 text-center md:text-left">
@@ -247,7 +379,6 @@
                                     <p className="text-xs font-bold text-blue-200 uppercase tracking-wider">Dr. Amadeo Enrique Vallejos — Intendente</p>
                                 </div>
                             </div>
-                            
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="bg-white p-6 rounded-xl shadow-sm border">
                                     <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2"><span className="text-blue-600"><Icons.Users/></span> Destinatarios</h3>
@@ -257,14 +388,6 @@
                                     <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2"><span className="text-blue-600"><Icons.Calendar/></span> Modalidad</h3>
                                     <p className="text-sm text-gray-600">Formato híbrido y asincrónico. Disponible todo el año 2026. Estudia a tu propio ritmo.</p>
                                 </div>
-                            </div>
-
-                            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
-                                <h3 className="font-bold text-gray-800 mb-2 flex items-center gap-2"><Icons.GraduationCap/> Evaluación</h3>
-                                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                                    <li><strong>Autoevaluaciones:</strong> Al final de cada módulo (No eliminatorias).</li>
-                                    <li><strong>Examen Final:</strong> Requisito para certificación (3 intentos anuales).</li>
-                                </ul>
                             </div>
                         </div>
                     ) : (
@@ -331,7 +454,18 @@
                                 })}
                             </div>
                             <div className="p-6 bg-gray-50 text-center border-t">
-                                <button className="bg-white border-2 border-blue-600 text-blue-600 px-6 py-2 rounded-full text-sm font-bold hover:bg-blue-50 flex items-center justify-center gap-2 mx-auto">
+                                <button 
+                                    onClick={() => {
+                                        if (mod.id === 1) {
+                                            setQuizAnswers({});
+                                            setQuizSubmitted(false);
+                                            setView('quiz');
+                                        } else {
+                                            alert("El examen para este módulo estará disponible próximamente.");
+                                        }
+                                    }} 
+                                    className="bg-white border-2 border-blue-600 text-blue-600 px-6 py-2 rounded-full text-sm font-bold hover:bg-blue-50 flex items-center justify-center gap-2 mx-auto"
+                                >
                                     <Icons.GraduationCap /> Realizar Autoevaluación
                                 </button>
                             </div>
