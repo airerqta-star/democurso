@@ -4,17 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Curso de Capacitación - Inspectores Reconquista</title>
-    <!-- Favicon con Logo Municipal -->
     <link rel="icon" href="https://drive.google.com/uc?export=view&id=1ofsZ0QkS8GX5aRTvg2UPa8_7lFAy8BbD" type="image/png">
     
-    <!-- 1. LIBRERÍAS VISUALES (Tailwind + React) -->
+    <!-- LIBRERÍAS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-    <!-- 2. FIREBASE (Versión Compat) -->
+    <!-- FIREBASE -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -24,35 +23,28 @@
         body { font-family: 'Inter', sans-serif; }
         .animate-fade-in { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .radio-label { cursor: pointer; transition: all 0.2s; }
-        .radio-input { display: none; }
-        .radio-box { border: 2px solid #E5E7EB; border-radius: 0.5rem; padding: 1rem; display: flex; align-items: center; gap: 0.5rem; }
-        .radio-input:checked + .radio-box { border-color: #2563EB; background-color: #EFF6FF; color: #1E40AF; font-weight: 600; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
 
-        // --- COMPONENTES DE LOGOS SVG (Simulación Vectorial de Identidad) ---
-        
+        // --- LOGOS SVG ---
         const LogoMuniHorizontal = ({ className }) => (
             <svg viewBox="0 0 280 60" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="0" y="10" width="5" height="40" fill="#EAB308" /> {/* Barra Amarilla */}
+                <rect x="0" y="10" width="5" height="40" fill="#EAB308" />
                 <text x="15" y="25" fontFamily="Arial, sans-serif" fontSize="10" fill="#6B7280" letterSpacing="1.5" fontWeight="bold">MUNICIPALIDAD DE</text>
                 <text x="14" y="48" fontFamily="Arial, sans-serif" fontSize="22" fill="#1E3A8A" fontWeight="900" letterSpacing="-0.5">RECONQUISTA</text>
             </svg>
         );
-
         const LogoMuniIcon = ({ className, color = "#1E3A8A" }) => (
             <svg viewBox="0 0 60 60" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="10" y="10" width="40" height="40" rx="8" fill={color} />
                 <path d="M30 20 L40 40 L20 40 Z" fill="#EAB308" />
             </svg>
         );
-
         const LogoSecretariaBanner = ({ className }) => (
             <svg viewBox="0 0 300 50" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="300" height="50" rx="4" fill="#1E40AF" />
@@ -60,7 +52,6 @@
                 <text x="150" y="38" fontFamily="Arial, sans-serif" fontSize="18" fill="#FFFFFF" textAnchor="middle" fontWeight="bold">CONTROL PÚBLICO</text>
             </svg>
         );
-
         const LogoSecretariaCuadrado = ({ className }) => (
             <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="100" height="100" fill="#1E3A8A" />
@@ -68,7 +59,6 @@
                 <text x="50" y="70" fontFamily="Arial, sans-serif" fontSize="20" fill="#FFFFFF" textAnchor="middle" fontWeight="bold">CONTROL</text>
             </svg>
         );
-
         const LogoAGC = ({ className }) => (
             <svg viewBox="0 0 220 50" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
                 <text x="0" y="35" fontFamily="Arial, sans-serif" fontSize="32" fontWeight="900" fill="#FFFFFF">AGC</text>
@@ -79,7 +69,7 @@
             </svg>
         );
 
-        // --- CONFIGURACIÓN DE FIREBASE ---
+        // --- FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyCnT1lv9iCHf5bcy99mvvJzla1VJViJQaQ",
             authDomain: "curso-inspectores-reconquista.firebaseapp.com",
@@ -89,13 +79,11 @@
             appId: "1:831626891216:web:0d7227d7cd1c8e163d73d5"
         };
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // --- DATOS ESTÁTICOS ---
+        // --- DATOS ---
         const AREAS_MUNICIPALES = [
             "Departamento de Seguridad Vial",
             "Oficina Sistema de Estacionamiento Inteligente (Parquímetro)",
@@ -114,7 +102,38 @@
             { name: "Dr. Ricardo Franco", role: "Agencia Gubernamental de Control" }
         ];
 
-        // --- ICONOS ---
+        const COURSE_DATA = [
+          { id: 1, title: "MÓDULO 1: Marco Legal y Ético", description: "Principios fundamentales del Poder de Policía y Ética Pública.", topics: [
+              { id: "1.1", title: "Principios Generales del Poder de Policía", content: "Análisis de la Constitución Nacional...", resources: [{ type: "pdf", label: "Constitución Provincial (Extracto)", url: null }, { type: "video", label: "Clase: Concepto de Poder de Policía", url: null }] },
+              { id: "1.2", title: "Ética Pública", content: "Estudio de la Ley de Ética Pública...", resources: [{ type: "pdf", label: "Ley de Ética Pública (Texto Completo)", url: "https://drive.google.com/file/d/11yRXoY0Vp22eA_c8OU4PdfirhnfAh3FK/view?usp=drive_link" }, { type: "presentation", label: "Presentación: Valores en la Administración", url: null }] }
+            ]
+          },
+          { id: 2, title: "MÓDULO 2: Tránsito y Seguridad Vial", description: "Normativas de tránsito, ordenanzas locales y leyes nacionales.", topics: [
+              { id: "2.1", title: "Código Municipal de Tránsito", content: "Ordenanza 4823/03...", resources: [{ type: "video", label: "Explicativo Ordenanza 4823/03 (NotebookLM)", url: null }, { type: "link", label: "Consulta Web Ordenanza Oficial", url: null }] },
+              { id: "2.2", title: "Leyes de Adhesión", content: "Marco de la Ley Nacional 24449...", resources: [{ type: "pdf", label: "Comparativa Ley Nacional vs Local", url: null }] },
+              { id: "2.3", title: "Estacionamiento Medido", content: "Regulaciones sobre el sistema de parquímetro...", resources: [{ type: "image", label: "Mapa de Zonas de Estacionamiento", url: null }] }
+            ]
+          },
+          { id: 3, title: "MÓDULO 3: Espacios Públicos", description: "Regulación y uso del dominio público municipal.", topics: [
+              { id: "3.1", title: "Reglamento de Uso", content: "Ordenanza 4877/03...", resources: [{ type: "pdf", label: "Ordenanza 4877/03 Texto Completo", url: null }] },
+              { id: "3.2", title: "Venta Ambulante", content: "Ordenanzas especiales...", resources: [{ type: "presentation", label: "Guía de Procedimiento", url: null }] }
+            ]
+          },
+          { id: 4, title: "MÓDULO 4: Régimen de Faltas", description: "Código de Faltas y tipificación de infracciones.", topics: [
+              { id: "4.1", title: "Código de Faltas - Parte General", content: "Ordenanza 4909/03...", resources: [{ type: "pdf", label: "Código de Faltas (Parte General)", url: null }] },
+              { id: "4.2", title: "Código de Faltas - Parte Especial", content: "Tipificación específica...", resources: [{ type: "video", label: "Casos Prácticos: Labrado de Actas", url: null }] }
+            ]
+          }
+        ];
+
+        const QUIZ_MOD_1 = [
+            { id: 1, question: "La Ley de Ética Pública se aplica solo a funcionarios de alto rango elegidos por voto popular.", correct: false },
+            { id: 2, question: "Es un deber ético abstenerse de usar información oficial para beneficios privados.", correct: true },
+            { id: 3, question: "Un funcionario puede ser proveedor del Estado si el precio es conveniente.", correct: false },
+            { id: 4, question: "La Comisión Provincial de Ética Pública depende jerárquicamente del Poder Ejecutivo.", correct: false },
+            { id: 5, question: "Existen excepciones reglamentadas a la prohibición de recibir obsequios (ej. cortesía diplomática).", correct: true }
+        ];
+
         const Icons = {
             Shield: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
             UserCheck: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>,
@@ -130,85 +149,14 @@
             FileText: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
             Video: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>,
             Monitor: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
-            Calendar: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Calendar: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+            MessageSquare: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+            Send: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         };
 
-        // --- DATOS DEL CURSO ---
-        const COURSE_DATA = [
-          {
-            id: 1,
-            title: "MÓDULO 1: Marco Legal y Ético",
-            description: "Principios fundamentales del Poder de Policía y Ética Pública.",
-            topics: [
-              { 
-                id: "1.1", 
-                title: "Principios Generales del Poder de Policía", 
-                content: "Análisis de la Constitución Nacional, Provincial y el marco normativo que otorga la facultad de control al municipio.", 
-                resources: [
-                    { type: "pdf", label: "Constitución Provincial (Extracto)", url: null }, 
-                    { type: "video", label: "Clase: Concepto de Poder de Policía", url: null }
-                ] 
-              },
-              { 
-                id: "1.2", 
-                title: "Ética Pública", 
-                content: "Estudio de la Ley de Ética Pública de la Provincia de Santa Fe (Ley 13230). Responsabilidades del funcionario y transparencia.", 
-                resources: [
-                    { 
-                        type: "pdf", 
-                        label: "Ley de Ética Pública (Texto Completo)", 
-                        url: "https://drive.google.com/file/d/11yRXoY0Vp22eA_c8OU4PdfirhnfAh3FK/view?usp=drive_link" 
-                    }, 
-                    { type: "presentation", label: "Presentación: Valores en la Administración", url: null }
-                ] 
-              }
-            ]
-          },
-          {
-            id: 2,
-            title: "MÓDULO 2: Tránsito y Seguridad Vial",
-            description: "Normativas de tránsito, ordenanzas locales y leyes nacionales.",
-            topics: [
-              { id: "2.1", title: "Código Municipal de Tránsito", content: "Ordenanza 4823/03. Definiciones de calzada, acera, zona peatonal y prioridades de paso.", resources: [{ type: "video", label: "Explicativo Ordenanza 4823/03 (NotebookLM)", url: null }, { type: "link", label: "Consulta Web Ordenanza Oficial", url: null }] },
-              { id: "2.2", title: "Leyes de Adhesión", content: "Marco de la Ley Nacional 24449 y Ley Provincial 13169. Articulación con la legislación local.", resources: [{ type: "pdf", label: "Comparativa Ley Nacional vs Local", url: null }] },
-              { id: "2.3", title: "Estacionamiento Medido", content: "Regulaciones sobre el sistema de parquímetro. Zonas permitidas, horarios y exenciones.", resources: [{ type: "image", label: "Mapa de Zonas de Estacionamiento", url: null }] }
-            ]
-          },
-          {
-            id: 3,
-            title: "MÓDULO 3: Espacios Públicos",
-            description: "Regulación y uso del dominio público municipal.",
-            topics: [
-              { id: "3.1", title: "Reglamento de Uso", content: "Ordenanza 4877/03. Normas de convivencia y cuidado del mobiliario urbano.", resources: [{ type: "pdf", label: "Ordenanza 4877/03 Texto Completo", url: null }] },
-              { id: "3.2", title: "Venta Ambulante", content: "Ordenanzas especiales sobre actividad comercial en la vía pública.", resources: [{ type: "presentation", label: "Guía de Procedimiento", url: null }] }
-            ]
-          },
-          {
-            id: 4,
-            title: "MÓDULO 4: Régimen de Faltas",
-            description: "Código de Faltas y tipificación de infracciones.",
-            topics: [
-              { id: "4.1", title: "Código de Faltas - Parte General", content: "Ordenanza 4909/03. Conceptos de falta, imputabilidad y sanciones.", resources: [{ type: "pdf", label: "Código de Faltas (Parte General)", url: null }] },
-              { id: "4.2", title: "Código de Faltas - Parte Especial", content: "Tipificación específica en Tránsito, Espacio Público y Medio Ambiente.", resources: [{ type: "video", label: "Casos Prácticos: Labrado de Actas", url: null }] }
-            ]
-          }
-        ];
-
-        const QUIZ_MOD_1 = [
-            { id: 1, question: "La Ley de Ética Pública se aplica solo a funcionarios de alto rango elegidos por voto popular.", correct: false },
-            { id: 2, question: "Es un deber ético abstenerse de usar información oficial para beneficios privados.", correct: true },
-            { id: 3, question: "Un funcionario puede ser proveedor del Estado si el precio es conveniente.", correct: false },
-            { id: 4, question: "La Comisión Provincial de Ética Pública depende jerárquicamente del Poder Ejecutivo.", correct: false },
-            { id: 5, question: "Existen excepciones reglamentadas a la prohibición de recibir obsequios (ej. cortesía diplomática).", correct: true }
-        ];
-
         const ResourceIcon = ({ type }) => {
-            const style = {
-                pdf: "text-red-500", video: "text-red-600", presentation: "text-orange-500", link: "text-blue-500", image: "text-purple-500"
-            }[type] || "text-gray-500";
-            const IconComp = {
-                pdf: Icons.FileText, video: Icons.Video, presentation: Icons.Monitor, link: Icons.BookOpen, image: Icons.BookOpen
-            }[type] || Icons.FileText;
+            const style = { pdf: "text-red-500", video: "text-red-600", presentation: "text-orange-500", link: "text-blue-500", image: "text-purple-500" }[type] || "text-gray-500";
+            const IconComp = { pdf: Icons.FileText, video: Icons.Video, presentation: Icons.Monitor, link: Icons.BookOpen, image: Icons.BookOpen }[type] || Icons.FileText;
             return <div className={style}><IconComp size={16} /></div>;
         };
 
@@ -222,15 +170,17 @@
             const [quizAnswers, setQuizAnswers] = useState({});
             const [quizSubmitted, setQuizSubmitted] = useState(false);
             const [quizScore, setQuizScore] = useState(0);
+            
+            // ESTADOS DEL FORO
+            const [forumPosts, setForumPosts] = useState([]);
+            const [newPost, setNewPost] = useState("");
 
             useEffect(() => {
                 const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
                     if (firebaseUser) {
                         const docRef = db.collection('USUARIOS').doc(firebaseUser.uid);
                         const docSnap = await docRef.get();
-                        if (docSnap.exists) {
-                            setUser({ uid: firebaseUser.uid, ...docSnap.data() });
-                        }
+                        if (docSnap.exists) setUser({ uid: firebaseUser.uid, ...docSnap.data() });
                     } else {
                         setUser(null);
                     }
@@ -239,51 +189,49 @@
                 return () => unsubscribe();
             }, []);
 
+            // LISTENER DEL FORO (TIEMPO REAL)
+            useEffect(() => {
+                if (view === 'dashboard' && dashboardTab === 'forum') {
+                    const unsubscribe = db.collection('FORO')
+                        .orderBy('timestamp', 'desc')
+                        .onSnapshot(snapshot => {
+                            const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                            setForumPosts(posts);
+                        });
+                    return () => unsubscribe();
+                }
+            }, [view, dashboardTab]);
+
             useEffect(() => {
                 if (!loading && user) {
                     if (user.status === 'active') {
-                        if (['landing', 'register', 'pending'].includes(view)) {
-                            setView('dashboard');
-                        }
-                    } else if (user.status === 'pending') {
-                        setView('pending');
-                    }
+                        if (['landing', 'register', 'pending'].includes(view)) setView('dashboard');
+                    } else if (user.status === 'pending') setView('pending');
                 }
             }, [user, loading, view]);
 
             const handleRegister = async (e) => {
                 e.preventDefault();
                 const formData = new FormData(e.target);
-                const nombre = formData.get('nombre');
-                const email = formData.get('email');
-                const password = formData.get('password');
-                const area = formData.get('area');
-
                 try {
-                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    const userCredential = await auth.createUserWithEmailAndPassword(formData.get('email'), formData.get('password'));
                     const uid = userCredential.user.uid;
-                    const newUserProfile = {
-                        name: nombre,
-                        email: email,
-                        area: area,
+                    await db.collection('USUARIOS').doc(uid).set({
+                        name: formData.get('nombre'),
+                        email: formData.get('email'),
+                        area: formData.get('area'),
                         status: 'pending',
                         progress: 0,
                         createdAt: new Date()
-                    };
-                    await db.collection('USUARIOS').doc(uid).set(newUserProfile);
-                } catch (error) {
-                    alert("Error en registro: " + error.message);
-                }
+                    });
+                } catch (error) { alert("Error en registro: " + error.message); }
             };
 
             const handleLogin = async (e) => {
                 e.preventDefault();
                 const formData = new FormData(e.target);
-                try {
-                    await auth.signInWithEmailAndPassword(formData.get('email'), formData.get('password'));
-                } catch (error) {
-                    alert("Error al ingresar: " + error.message);
-                }
+                try { await auth.signInWithEmailAndPassword(formData.get('email'), formData.get('password')); }
+                catch (error) { alert("Error al ingresar: " + error.message); }
             }
 
             const simulateAdminApproval = async () => {
@@ -291,9 +239,7 @@
                 try {
                     await db.collection('USUARIOS').doc(user.uid).update({ status: 'active' });
                     setUser(prev => ({ ...prev, status: 'active' }));
-                } catch (error) {
-                    console.error("Error actualizando:", error);
-                }
+                } catch (error) { console.error("Error actualizando:", error); }
             };
 
             const handleLogout = async () => {
@@ -321,18 +267,28 @@
                     if((user?.progress || 0) < 25) updateProgress((user?.progress || 0) + 25);
                 }
             };
-            
-            // COMPONENTE: PIE DE PÁGINA INSTITUCIONAL
+
+            const postToForum = async (e) => {
+                e.preventDefault();
+                if(!newPost.trim()) return;
+                try {
+                    await db.collection('FORO').add({
+                        text: newPost,
+                        userId: user.uid,
+                        userName: user.name,
+                        userArea: user.area,
+                        timestamp: new Date() // Usar serverTimestamp en prod
+                    });
+                    setNewPost("");
+                } catch(err) { console.error(err); }
+            };
+
             const FooterInstitucional = () => (
                 <footer className="bg-gray-800 text-gray-400 py-8 px-4 border-t border-gray-700 mt-auto">
                     <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center gap-6 text-center">
                         <div className="flex flex-col items-center">
                             <p className="text-xs uppercase tracking-widest font-semibold text-gray-500 mb-2">Con el apoyo técnico y supervisión de</p>
-                            <div className="flex items-center gap-3">
-                                <div className="bg-transparent p-1 rounded">
-                                    <LogoAGC className="h-10 w-auto" />
-                                </div>
-                            </div>
+                            <div className="bg-transparent p-1 rounded"><LogoAGC className="h-10 w-auto" /></div>
                         </div>
                     </div>
                     <p className="text-center text-xs text-gray-600 mt-8">© 2026 Sistema de Capacitación Municipal. Desarrollo interno.</p>
@@ -345,31 +301,19 @@
                 <div className="animate-fade-in flex flex-col min-h-screen">
                     <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100">
                          <div className="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center">
-                             {/* Logo Izquierda */}
-                             <div className="flex items-center gap-3">
-                                 <LogoMuniHorizontal className="h-12 w-auto" />
-                             </div>
-                             {/* Logo Derecha (Banner) */}
-                             <div className="hidden md:block">
-                                 <LogoSecretariaBanner className="h-12 w-auto" />
-                             </div>
+                             <div className="flex items-center gap-3"><LogoMuniHorizontal className="h-12 w-auto" /></div>
+                             <div className="hidden md:block"><LogoSecretariaBanner className="h-12 w-auto" /></div>
                          </div>
                     </header>
-
                     <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white py-16 px-4 text-center relative overflow-hidden flex-grow">
                         <div className="max-w-4xl mx-auto relative z-10">
-                            <div className="md:hidden mb-8 flex justify-center">
-                                <LogoSecretariaBanner className="h-12 w-auto" />
-                            </div>
-                            
+                            <div className="md:hidden mb-8 flex justify-center"><LogoSecretariaBanner className="h-12 w-auto" /></div>
                             <h1 className="text-4xl md:text-6xl font-extrabold mb-6">CURSO DE CAPACITACIÓN <br/> PARA INSPECTORES</h1>
                             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">Plataforma oficial de formación continua.</p>
-                            
-                            {/* Login */}
                             <div className="bg-white/10 backdrop-blur-md p-6 rounded-xl max-w-md mx-auto border border-white/20 shadow-2xl">
                                 <form onSubmit={handleLogin} className="space-y-3 text-left">
-                                    <input name="email" type="email" placeholder="Correo electrónico" required className="w-full p-2 rounded text-gray-800 bg-white/95 focus:ring-2 focus:ring-yellow-400 outline-none" />
-                                    <input name="password" type="password" placeholder="Contraseña" required className="w-full p-2 rounded text-gray-800 bg-white/95 focus:ring-2 focus:ring-yellow-400 outline-none" />
+                                    <input name="email" type="email" placeholder="Correo electrónico" required className="w-full p-2 rounded text-gray-800 bg-white/95 outline-none" />
+                                    <input name="password" type="password" placeholder="Contraseña" required className="w-full p-2 rounded text-gray-800 bg-white/95 outline-none" />
                                     <button className="w-full bg-yellow-500 hover:bg-yellow-400 text-blue-900 font-bold py-2 rounded transition transform active:scale-95">Ingresar</button>
                                 </form>
                                 <div className="mt-4 text-sm border-t border-white/20 pt-3 flex justify-between items-center">
@@ -379,18 +323,14 @@
                             </div>
                         </div>
                     </div>
-                    
                     <section className="py-12 bg-white border-b">
                         <div className="max-w-5xl mx-auto px-4">
                             <h3 className="text-center text-gray-500 font-bold uppercase text-xs mb-8 tracking-widest">Dirección y Organización</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                                {AUTORIDADES.map((p,i)=> (
-                                    <div key={i} className="p-4 bg-gray-50 rounded border"><p className="font-bold text-blue-900">{p.name}</p><p className="text-xs text-gray-600">{p.role}</p></div>
-                                ))}
+                                {AUTORIDADES.map((p,i)=> (<div key={i} className="p-4 bg-gray-50 rounded border"><p className="font-bold text-blue-900">{p.name}</p><p className="text-xs text-gray-600">{p.role}</p></div>))}
                             </div>
                         </div>
                     </section>
-                    
                     <FooterInstitucional />
                 </div>
             );
@@ -406,12 +346,7 @@
                             <div><label className="block text-sm font-medium text-gray-700">Nombre Completo</label><input required name="nombre" className="w-full mt-1 p-2 border rounded" placeholder="Ej: Juan Pérez" /></div>
                             <div><label className="block text-sm font-medium text-gray-700">Correo Oficial</label><input required name="email" type="email" className="w-full mt-1 p-2 border rounded" placeholder="correo@reconquista.gov.ar" /></div>
                             <div><label className="block text-sm font-medium text-gray-700">Contraseña</label><input required name="password" type="password" className="w-full mt-1 p-2 border rounded" placeholder="Crear una contraseña segura" /></div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Área / Departamento</label>
-                                <select name="area" className="w-full mt-1 p-2 border rounded">
-                                    {AREAS_MUNICIPALES.map((area, i) => <option key={i} value={area}>{area}</option>)}
-                                </select>
-                            </div>
+                            <div><label className="block text-sm font-medium text-gray-700">Área / Departamento</label><select name="area" className="w-full mt-1 p-2 border rounded">{AREAS_MUNICIPALES.map((area, i) => <option key={i} value={area}>{area}</option>)}</select></div>
                             <button type="submit" className="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 mt-4">Registrarse</button>
                             <button type="button" onClick={() => setView('landing')} className="w-full text-gray-500 text-sm mt-2">Volver</button>
                         </form>
@@ -434,7 +369,6 @@
                 </div>
             );
 
-            // DASHBOARD Y MÓDULOS
             const CourseLayout = ({children}) => (
                 <div className="min-h-screen bg-gray-50 flex flex-col font-sans animate-fade-in">
                     <nav className="bg-white shadow-sm border-b sticky top-0 z-20">
@@ -465,8 +399,10 @@
                             <button onClick={() => setDashboardTab('modules')} className={`pb-2 text-sm font-bold border-b-2 ${dashboardTab === 'modules' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'}`}>Mis Cursos</button>
                             <button onClick={() => setDashboardTab('info')} className={`pb-2 text-sm font-bold border-b-2 ${dashboardTab === 'info' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'}`}>Información</button>
                             <button onClick={() => setDashboardTab('team')} className={`pb-2 text-sm font-bold border-b-2 ${dashboardTab === 'team' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'}`}>Autoridades</button>
+                            <button onClick={() => setDashboardTab('forum')} className={`pb-2 text-sm font-bold border-b-2 ${dashboardTab === 'forum' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 flex items-center gap-1'} `}><Icons.MessageSquare size={14}/> Foro de Consultas</button>
                         </div>
                     </div>
+                    
                     {dashboardTab === 'info' && (
                         <div className="animate-fade-in space-y-6">
                              <div className="bg-gradient-to-br from-blue-900 to-blue-700 text-white rounded-xl p-8 shadow-lg flex flex-col md:flex-row items-center gap-6">
@@ -481,6 +417,7 @@
                             </div>
                         </div>
                     )}
+                    
                     {dashboardTab === 'team' && (
                         <div className="animate-fade-in space-y-6">
                             <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
@@ -488,9 +425,7 @@
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     {AUTORIDADES.map((auth, i) => (
                                         <div key={i} className="p-6 bg-gray-50 rounded-xl border border-gray-100 text-center hover:shadow-md transition">
-                                            <div className="w-16 h-16 bg-blue-100 rounded-full mx-auto flex items-center justify-center mb-4 text-blue-600">
-                                                <Icons.Users />
-                                            </div>
+                                            <div className="w-16 h-16 bg-blue-100 rounded-full mx-auto flex items-center justify-center mb-4 text-blue-600"><Icons.Users /></div>
                                             <h3 className="font-bold text-blue-900 text-lg">{auth.name}</h3>
                                             <p className="text-sm text-gray-600 mt-1 font-medium">{auth.role}</p>
                                         </div>
@@ -499,6 +434,55 @@
                             </div>
                         </div>
                     )}
+
+                    {dashboardTab === 'forum' && (
+                        <div className="animate-fade-in max-w-4xl mx-auto">
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                                <div className="bg-blue-50 p-6 border-b border-blue-100">
+                                    <h3 className="font-bold text-blue-900 text-lg flex items-center gap-2"><Icons.MessageSquare /> Foro de Consultas Académicas</h3>
+                                    <p className="text-sm text-blue-700 mt-1">Espacio para dudas sobre el contenido del curso. Los profesores y compañeros pueden responder.</p>
+                                </div>
+                                
+                                {/* Lista de Mensajes */}
+                                <div className="p-6 space-y-6 max-h-[500px] overflow-y-auto bg-gray-50/50">
+                                    {forumPosts.length === 0 ? (
+                                        <p className="text-center text-gray-500 italic py-8">Aún no hay consultas. ¡Sé el primero en preguntar!</p>
+                                    ) : (
+                                        forumPosts.map(post => (
+                                            <div key={post.id} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div>
+                                                        <span className="font-bold text-gray-900">{post.userName}</span>
+                                                        <span className="text-xs text-gray-500 ml-2">({post.userArea})</span>
+                                                    </div>
+                                                    {post.timestamp && <span className="text-xs text-gray-400">{new Date(post.timestamp.seconds * 1000).toLocaleDateString()}</span>}
+                                                </div>
+                                                <p className="text-gray-700">{post.text}</p>
+                                                {/* Aquí irían las respuestas en una versión v2 */}
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+
+                                {/* Formulario */}
+                                <div className="p-4 bg-white border-t border-gray-200">
+                                    <form onSubmit={postToForum} className="flex gap-3">
+                                        <input 
+                                            type="text" 
+                                            value={newPost}
+                                            onChange={(e) => setNewPost(e.target.value)}
+                                            placeholder="Escribe tu consulta aquí..." 
+                                            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                                        />
+                                        <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 flex items-center gap-2">
+                                            <Icons.Send /> Enviar
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {dashboardTab === 'modules' && (
                         <div className="animate-fade-in">
                              <div className="bg-white p-6 rounded-lg shadow-sm mb-6 border">
@@ -599,4 +583,5 @@
     </script>
 </body>
 </html>
+
 
