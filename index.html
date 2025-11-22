@@ -4,30 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Curso de Capacitación - Inspectores Reconquista</title>
+    <!-- Favicon con Logo Municipal -->
+    <link rel="icon" href="https://drive.google.com/uc?export=view&id=1ofsZ0QkS8GX5aRTvg2UPa8_7lFAy8BbD" type="image/png">
     
-    <!-- LIBRERÍAS EXTERNAS (Tailwind + React) -->
+    <!-- 1. LIBRERÍAS VISUALES (Tailwind + React) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Librería para efecto de confeti al aprobar -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- 2. FIREBASE (Versión Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
         body { font-family: 'Inter', sans-serif; }
         .animate-fade-in { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Estilos para Radio Buttons personalizados */
         .radio-label { cursor: pointer; transition: all 0.2s; }
         .radio-input { display: none; }
-        .radio-box {
-            border: 2px solid #E5E7EB; border-radius: 0.5rem; padding: 1rem; display: flex; align-items: center; gap: 0.5rem;
-        }
-        .radio-input:checked + .radio-box {
-            border-color: #2563EB; background-color: #EFF6FF; color: #1E40AF; font-weight: 600;
-        }
+        .radio-box { border: 2px solid #E5E7EB; border-radius: 0.5rem; padding: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .radio-input:checked + .radio-box { border-color: #2563EB; background-color: #EFF6FF; color: #1E40AF; font-weight: 600; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -36,13 +36,90 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // --- 1. COLECCIÓN DE ÍCONOS ---
+        // --- COMPONENTES DE LOGOS SVG (Simulación Vectorial de Identidad) ---
+        
+        const LogoMuniHorizontal = ({ className }) => (
+            <svg viewBox="0 0 280 60" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="0" y="10" width="5" height="40" fill="#EAB308" /> {/* Barra Amarilla */}
+                <text x="15" y="25" fontFamily="Arial, sans-serif" fontSize="10" fill="#6B7280" letterSpacing="1.5" fontWeight="bold">MUNICIPALIDAD DE</text>
+                <text x="14" y="48" fontFamily="Arial, sans-serif" fontSize="22" fill="#1E3A8A" fontWeight="900" letterSpacing="-0.5">RECONQUISTA</text>
+            </svg>
+        );
+
+        const LogoMuniIcon = ({ className, color = "#1E3A8A" }) => (
+            <svg viewBox="0 0 60 60" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="10" y="10" width="40" height="40" rx="8" fill={color} />
+                <path d="M30 20 L40 40 L20 40 Z" fill="#EAB308" />
+            </svg>
+        );
+
+        const LogoSecretariaBanner = ({ className }) => (
+            <svg viewBox="0 0 300 50" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="300" height="50" rx="4" fill="#1E40AF" />
+                <text x="150" y="18" fontFamily="Arial, sans-serif" fontSize="9" fill="#BFDBFE" textAnchor="middle" letterSpacing="1">SECRETARÍA DE</text>
+                <text x="150" y="38" fontFamily="Arial, sans-serif" fontSize="18" fill="#FFFFFF" textAnchor="middle" fontWeight="bold">CONTROL PÚBLICO</text>
+            </svg>
+        );
+
+        const LogoSecretariaCuadrado = ({ className }) => (
+            <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="100" fill="#1E3A8A" />
+                <text x="50" y="40" fontFamily="Arial, sans-serif" fontSize="10" fill="#EAB308" textAnchor="middle">SECRETARÍA</text>
+                <text x="50" y="70" fontFamily="Arial, sans-serif" fontSize="20" fill="#FFFFFF" textAnchor="middle" fontWeight="bold">CONTROL</text>
+            </svg>
+        );
+
+        const LogoAGC = ({ className }) => (
+            <svg viewBox="0 0 220 50" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+                <text x="0" y="35" fontFamily="Arial, sans-serif" fontSize="32" fontWeight="900" fill="#FFFFFF">AGC</text>
+                <line x1="75" y1="5" x2="75" y2="45" stroke="#FFFFFF" strokeOpacity="0.5" strokeWidth="1" />
+                <text x="85" y="20" fontFamily="Arial, sans-serif" fontSize="9" fill="#FFFFFF" opacity="0.9">AGENCIA</text>
+                <text x="85" y="32" fontFamily="Arial, sans-serif" fontSize="9" fill="#FFFFFF" opacity="0.9">GUBERNAMENTAL</text>
+                <text x="85" y="44" fontFamily="Arial, sans-serif" fontSize="9" fill="#FFFFFF" opacity="0.9">DE CONTROL</text>
+            </svg>
+        );
+
+        // --- CONFIGURACIÓN DE FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCnT1lv9iCHf5bcy99mvvJzla1VJViJQaQ",
+            authDomain: "curso-inspectores-reconquista.firebaseapp.com",
+            projectId: "curso-inspectores-reconquista",
+            storageBucket: "curso-inspectores-reconquista.firebasestorage.app",
+            messagingSenderId: "831626891216",
+            appId: "1:831626891216:web:0d7227d7cd1c8e163d73d5"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // --- DATOS ESTÁTICOS ---
+        const AREAS_MUNICIPALES = [
+            "Departamento de Seguridad Vial",
+            "Oficina Sistema de Estacionamiento Inteligente (Parquímetro)",
+            "Oficina Corralón Municipal",
+            "Departamento A.S.S.A.L.",
+            "Oficina Puerto Fiscalizador",
+            "Departamento Inspección General",
+            "Oficina de Habilitaciones",
+            "Departamento de Seguridad Urbana y CEO",
+            "ASPIRANTE (Externo)"
+        ];
+
+        const AUTORIDADES = [
+            { name: "Lic. Nicolás Sandrigo", role: "Secretaría de Control Público" },
+            { name: "Dra. Soledad Cáceres", role: "Juzgado Municipal de Faltas" },
+            { name: "Dr. Ricardo Franco", role: "Agencia Gubernamental de Control" }
+        ];
+
+        // --- ICONOS ---
         const Icons = {
             Shield: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
             UserCheck: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>,
             BookOpen: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
             CheckCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
-            XCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>,
             Users: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
             Lock: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
             LogOut: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
@@ -56,15 +133,35 @@
             Calendar: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         };
 
-        // --- 2. DATOS DEL CURSO ---
+        // --- DATOS DEL CURSO ---
         const COURSE_DATA = [
           {
             id: 1,
             title: "MÓDULO 1: Marco Legal y Ético",
             description: "Principios fundamentales del Poder de Policía y Ética Pública.",
             topics: [
-              { id: "1.1", title: "Principios Generales del Poder de Policía", content: "Análisis de la Constitución Nacional, Provincial y el marco normativo que otorga la facultad de control al municipio.", resources: [{ type: "pdf", label: "Constitución Provincial (Extracto)" }, { type: "video", label: "Clase: Concepto de Poder de Policía" }] },
-              { id: "1.2", title: "Ética Pública", content: "Estudio de la Ley de Ética Pública de la Provincia de Santa Fe (Ley 13230). Responsabilidades del funcionario y transparencia.", resources: [{ type: "pdf", label: "Ley de Ética Pública" }, { type: "presentation", label: "Presentación: Valores en la Administración" }] }
+              { 
+                id: "1.1", 
+                title: "Principios Generales del Poder de Policía", 
+                content: "Análisis de la Constitución Nacional, Provincial y el marco normativo que otorga la facultad de control al municipio.", 
+                resources: [
+                    { type: "pdf", label: "Constitución Provincial (Extracto)", url: null }, 
+                    { type: "video", label: "Clase: Concepto de Poder de Policía", url: null }
+                ] 
+              },
+              { 
+                id: "1.2", 
+                title: "Ética Pública", 
+                content: "Estudio de la Ley de Ética Pública de la Provincia de Santa Fe (Ley 13230). Responsabilidades del funcionario y transparencia.", 
+                resources: [
+                    { 
+                        type: "pdf", 
+                        label: "Ley de Ética Pública (Texto Completo)", 
+                        url: "https://drive.google.com/file/d/11yRXoY0Vp22eA_c8OU4PdfirhnfAh3FK/view?usp=drive_link" 
+                    }, 
+                    { type: "presentation", label: "Presentación: Valores en la Administración", url: null }
+                ] 
+              }
             ]
           },
           {
@@ -72,9 +169,9 @@
             title: "MÓDULO 2: Tránsito y Seguridad Vial",
             description: "Normativas de tránsito, ordenanzas locales y leyes nacionales.",
             topics: [
-              { id: "2.1", title: "Código Municipal de Tránsito", content: "Ordenanza 4823/03. Definiciones de calzada, acera, zona peatonal y prioridades de paso.", resources: [{ type: "video", label: "Explicativo Ordenanza 4823/03 (NotebookLM)" }, { type: "link", label: "Consulta Web Ordenanza Oficial" }] },
-              { id: "2.2", title: "Leyes de Adhesión", content: "Marco de la Ley Nacional 24449 y Ley Provincial 13169. Articulación con la legislación local.", resources: [{ type: "pdf", label: "Comparativa Ley Nacional vs Local" }] },
-              { id: "2.3", title: "Estacionamiento Medido", content: "Regulaciones sobre el sistema de parquímetro. Zonas permitidas, horarios y exenciones.", resources: [{ type: "image", label: "Mapa de Zonas de Estacionamiento" }] }
+              { id: "2.1", title: "Código Municipal de Tránsito", content: "Ordenanza 4823/03. Definiciones de calzada, acera, zona peatonal y prioridades de paso.", resources: [{ type: "video", label: "Explicativo Ordenanza 4823/03 (NotebookLM)", url: null }, { type: "link", label: "Consulta Web Ordenanza Oficial", url: null }] },
+              { id: "2.2", title: "Leyes de Adhesión", content: "Marco de la Ley Nacional 24449 y Ley Provincial 13169. Articulación con la legislación local.", resources: [{ type: "pdf", label: "Comparativa Ley Nacional vs Local", url: null }] },
+              { id: "2.3", title: "Estacionamiento Medido", content: "Regulaciones sobre el sistema de parquímetro. Zonas permitidas, horarios y exenciones.", resources: [{ type: "image", label: "Mapa de Zonas de Estacionamiento", url: null }] }
             ]
           },
           {
@@ -82,8 +179,8 @@
             title: "MÓDULO 3: Espacios Públicos",
             description: "Regulación y uso del dominio público municipal.",
             topics: [
-              { id: "3.1", title: "Reglamento de Uso", content: "Ordenanza 4877/03. Normas de convivencia y cuidado del mobiliario urbano.", resources: [{ type: "pdf", label: "Ordenanza 4877/03 Texto Completo" }] },
-              { id: "3.2", title: "Venta Ambulante", content: "Ordenanzas especiales sobre actividad comercial en la vía pública.", resources: [{ type: "presentation", label: "Guía de Procedimiento" }] }
+              { id: "3.1", title: "Reglamento de Uso", content: "Ordenanza 4877/03. Normas de convivencia y cuidado del mobiliario urbano.", resources: [{ type: "pdf", label: "Ordenanza 4877/03 Texto Completo", url: null }] },
+              { id: "3.2", title: "Venta Ambulante", content: "Ordenanzas especiales sobre actividad comercial en la vía pública.", resources: [{ type: "presentation", label: "Guía de Procedimiento", url: null }] }
             ]
           },
           {
@@ -91,13 +188,12 @@
             title: "MÓDULO 4: Régimen de Faltas",
             description: "Código de Faltas y tipificación de infracciones.",
             topics: [
-              { id: "4.1", title: "Código de Faltas - Parte General", content: "Ordenanza 4909/03. Conceptos de falta, imputabilidad y sanciones.", resources: [{ type: "pdf", label: "Código de Faltas (Parte General)" }] },
-              { id: "4.2", title: "Código de Faltas - Parte Especial", content: "Tipificación específica en Tránsito, Espacio Público y Medio Ambiente.", resources: [{ type: "video", label: "Casos Prácticos: Labrado de Actas" }] }
+              { id: "4.1", title: "Código de Faltas - Parte General", content: "Ordenanza 4909/03. Conceptos de falta, imputabilidad y sanciones.", resources: [{ type: "pdf", label: "Código de Faltas (Parte General)", url: null }] },
+              { id: "4.2", title: "Código de Faltas - Parte Especial", content: "Tipificación específica en Tránsito, Espacio Público y Medio Ambiente.", resources: [{ type: "video", label: "Casos Prácticos: Labrado de Actas", url: null }] }
             ]
           }
         ];
 
-        // --- DATOS DEL EXAMEN (MÓDULO 1) ---
         const QUIZ_MOD_1 = [
             { id: 1, question: "La Ley de Ética Pública se aplica solo a funcionarios de alto rango elegidos por voto popular.", correct: false },
             { id: 2, question: "Es un deber ético abstenerse de usar información oficial para beneficios privados.", correct: true },
@@ -110,149 +206,214 @@
             const style = {
                 pdf: "text-red-500", video: "text-red-600", presentation: "text-orange-500", link: "text-blue-500", image: "text-purple-500"
             }[type] || "text-gray-500";
-            
             const IconComp = {
                 pdf: Icons.FileText, video: Icons.Video, presentation: Icons.Monitor, link: Icons.BookOpen, image: Icons.BookOpen
             }[type] || Icons.FileText;
-
             return <div className={style}><IconComp size={16} /></div>;
         };
 
-        // --- 3. COMPONENTE PRINCIPAL ---
         const App = () => {
             const [view, setView] = useState('landing');
             const [user, setUser] = useState(null);
+            const [loading, setLoading] = useState(true);
             const [activeModule, setActiveModule] = useState(null);
             const [expandedTopic, setExpandedTopic] = useState(null);
-            const [progress, setProgress] = useState(0);
             const [dashboardTab, setDashboardTab] = useState('modules');
-            
-            // Estados del Quiz
             const [quizAnswers, setQuizAnswers] = useState({});
             const [quizSubmitted, setQuizSubmitted] = useState(false);
             const [quizScore, setQuizScore] = useState(0);
 
-            // Cargar usuario guardado
             useEffect(() => {
-                const savedUser = localStorage.getItem('cursoApp_user_v4');
-                if (savedUser) {
-                    const u = JSON.parse(savedUser);
-                    setUser(u);
-                    if(u.progress) setProgress(u.progress);
-                }
+                const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
+                    if (firebaseUser) {
+                        const docRef = db.collection('USUARIOS').doc(firebaseUser.uid);
+                        const docSnap = await docRef.get();
+                        if (docSnap.exists) {
+                            setUser({ uid: firebaseUser.uid, ...docSnap.data() });
+                        }
+                    } else {
+                        setUser(null);
+                    }
+                    setLoading(false);
+                });
+                return () => unsubscribe();
             }, []);
 
-            // Enrutamiento Seguro
             useEffect(() => {
-                if (user && user.status === 'active') {
-                    if (['landing', 'register', 'pending'].includes(view)) {
-                        setView('dashboard');
+                if (!loading && user) {
+                    if (user.status === 'active') {
+                        if (['landing', 'register', 'pending'].includes(view)) {
+                            setView('dashboard');
+                        }
+                    } else if (user.status === 'pending') {
+                        setView('pending');
                     }
                 }
-            }, [user, view]);
+            }, [user, loading, view]);
 
-            const handleRegister = (e) => {
+            const handleRegister = async (e) => {
                 e.preventDefault();
                 const formData = new FormData(e.target);
-                const newUser = {
-                    name: formData.get('nombre'),
-                    email: formData.get('email'),
-                    area: formData.get('area'),
-                    status: 'pending',
-                    progress: 0
-                };
-                localStorage.setItem('cursoApp_user_v4', JSON.stringify(newUser));
-                setUser(newUser);
-                setView('pending');
+                const nombre = formData.get('nombre');
+                const email = formData.get('email');
+                const password = formData.get('password');
+                const area = formData.get('area');
+
+                try {
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    const uid = userCredential.user.uid;
+                    const newUserProfile = {
+                        name: nombre,
+                        email: email,
+                        area: area,
+                        status: 'pending',
+                        progress: 0,
+                        createdAt: new Date()
+                    };
+                    await db.collection('USUARIOS').doc(uid).set(newUserProfile);
+                } catch (error) {
+                    alert("Error en registro: " + error.message);
+                }
             };
 
-            const simulateAdminApproval = () => {
-                const approvedUser = { ...user, status: 'active' };
-                localStorage.setItem('cursoApp_user_v4', JSON.stringify(approvedUser));
-                setUser(approvedUser);
+            const handleLogin = async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                try {
+                    await auth.signInWithEmailAndPassword(formData.get('email'), formData.get('password'));
+                } catch (error) {
+                    alert("Error al ingresar: " + error.message);
+                }
+            }
+
+            const simulateAdminApproval = async () => {
+                if (!user) return;
+                try {
+                    await db.collection('USUARIOS').doc(user.uid).update({ status: 'active' });
+                    setUser(prev => ({ ...prev, status: 'active' }));
+                } catch (error) {
+                    console.error("Error actualizando:", error);
+                }
             };
 
-            const handleLogout = () => {
-                localStorage.removeItem('cursoApp_user_v4');
+            const handleLogout = async () => {
+                await auth.signOut();
                 setUser(null);
                 setView('landing');
                 setDashboardTab('modules');
-                setQuizAnswers({});
-                setQuizSubmitted(false);
-                setProgress(0);
             };
 
-            const updateProgress = (newVal) => {
+            const updateProgress = async (newVal) => {
                 const p = Math.min(newVal, 100);
-                setProgress(p);
-                const updatedUser = { ...user, progress: p };
-                setUser(updatedUser);
-                localStorage.setItem('cursoApp_user_v4', JSON.stringify(updatedUser));
+                if (user) {
+                     await db.collection('USUARIOS').doc(user.uid).update({ progress: p });
+                     setUser(prev => ({ ...prev, progress: p }));
+                }
             }
-
-            // LÓGICA DEL EXAMEN
-            const handleQuizOptionChange = (qId, val) => {
-                if(quizSubmitted) return;
-                setQuizAnswers(prev => ({...prev, [qId]: val}));
-            };
 
             const submitQuiz = () => {
                 let score = 0;
-                QUIZ_MOD_1.forEach(q => {
-                    if(quizAnswers[q.id] === q.correct) score++;
-                });
+                QUIZ_MOD_1.forEach(q => { if(quizAnswers[q.id] === q.correct) score++; });
                 setQuizScore(score);
                 setQuizSubmitted(true);
-
                 if(score >= 3) {
-                    confetti({
-                        particleCount: 150,
-                        spread: 70,
-                        origin: { y: 0.6 }
-                    });
-                    if(progress < 25) updateProgress(progress + 25);
+                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                    if((user?.progress || 0) < 25) updateProgress((user?.progress || 0) + 25);
                 }
             };
-
-            // --- VISTAS DE LA APLICACIÓN ---
-
-            if (view === 'landing') return (
-                <div className="animate-fade-in">
-                    <header className="bg-gradient-to-r from-blue-900 to-blue-800 text-white py-16 px-4 text-center relative overflow-hidden">
-                        <div className="max-w-4xl mx-auto relative z-10">
-                            <div className="inline-block bg-blue-700/50 px-4 py-1 rounded-full text-sm mb-4 border border-blue-500">Municipalidad de Reconquista</div>
-                            <h1 className="text-4xl md:text-6xl font-extrabold mb-6">CURSO DE CAPACITACIÓN <br/> PARA INSPECTORES</h1>
-                            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">Plataforma oficial de formación continua.</p>
-                            <div className="flex justify-center">
-                                <button onClick={() => setView('register')} className="bg-yellow-500 hover:bg-yellow-400 text-blue-900 font-bold py-3 px-8 rounded-lg shadow-lg flex items-center gap-2 transition transform hover:scale-105">
-                                    <Icons.UserCheck /> Inscripción 2026
-                                </button>
+            
+            // COMPONENTE: PIE DE PÁGINA INSTITUCIONAL
+            const FooterInstitucional = () => (
+                <footer className="bg-gray-800 text-gray-400 py-8 px-4 border-t border-gray-700 mt-auto">
+                    <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center gap-6 text-center">
+                        <div className="flex flex-col items-center">
+                            <p className="text-xs uppercase tracking-widest font-semibold text-gray-500 mb-2">Con el apoyo técnico y supervisión de</p>
+                            <div className="flex items-center gap-3">
+                                <div className="bg-transparent p-1 rounded">
+                                    <LogoAGC className="h-10 w-auto" />
+                                </div>
                             </div>
                         </div>
+                    </div>
+                    <p className="text-center text-xs text-gray-600 mt-8">© 2026 Sistema de Capacitación Municipal. Desarrollo interno.</p>
+                </footer>
+            );
+
+            if (loading) return <div className="h-screen flex items-center justify-center text-blue-600 font-bold animate-pulse">Conectando con Campus Reconquista...</div>;
+
+            if (view === 'landing') return (
+                <div className="animate-fade-in flex flex-col min-h-screen">
+                    <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100">
+                         <div className="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center">
+                             {/* Logo Izquierda */}
+                             <div className="flex items-center gap-3">
+                                 <LogoMuniHorizontal className="h-12 w-auto" />
+                             </div>
+                             {/* Logo Derecha (Banner) */}
+                             <div className="hidden md:block">
+                                 <LogoSecretariaBanner className="h-12 w-auto" />
+                             </div>
+                         </div>
                     </header>
+
+                    <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white py-16 px-4 text-center relative overflow-hidden flex-grow">
+                        <div className="max-w-4xl mx-auto relative z-10">
+                            <div className="md:hidden mb-8 flex justify-center">
+                                <LogoSecretariaBanner className="h-12 w-auto" />
+                            </div>
+                            
+                            <h1 className="text-4xl md:text-6xl font-extrabold mb-6">CURSO DE CAPACITACIÓN <br/> PARA INSPECTORES</h1>
+                            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">Plataforma oficial de formación continua.</p>
+                            
+                            {/* Login */}
+                            <div className="bg-white/10 backdrop-blur-md p-6 rounded-xl max-w-md mx-auto border border-white/20 shadow-2xl">
+                                <form onSubmit={handleLogin} className="space-y-3 text-left">
+                                    <input name="email" type="email" placeholder="Correo electrónico" required className="w-full p-2 rounded text-gray-800 bg-white/95 focus:ring-2 focus:ring-yellow-400 outline-none" />
+                                    <input name="password" type="password" placeholder="Contraseña" required className="w-full p-2 rounded text-gray-800 bg-white/95 focus:ring-2 focus:ring-yellow-400 outline-none" />
+                                    <button className="w-full bg-yellow-500 hover:bg-yellow-400 text-blue-900 font-bold py-2 rounded transition transform active:scale-95">Ingresar</button>
+                                </form>
+                                <div className="mt-4 text-sm border-t border-white/20 pt-3 flex justify-between items-center">
+                                    <span className="text-blue-200">¿Primera vez?</span>
+                                    <button onClick={() => setView('register')} className="text-white font-bold hover:underline flex items-center gap-1">Crear cuenta <Icons.ArrowRight/></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <section className="py-12 bg-white border-b">
                         <div className="max-w-5xl mx-auto px-4">
                             <h3 className="text-center text-gray-500 font-bold uppercase text-xs mb-8 tracking-widest">Dirección y Organización</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                                {[{name:"Lic. Nicolás Sandrigo", role:"Secretaría de Control Público"}, {name:"Dra. Soledad Cáceres", role:"Juzgado Municipal de Faltas"}, {name:"Dr. Ricardo Franco", role:"Agencia Gubernamental de Control"}].map((p,i)=> (
+                                {AUTORIDADES.map((p,i)=> (
                                     <div key={i} className="p-4 bg-gray-50 rounded border"><p className="font-bold text-blue-900">{p.name}</p><p className="text-xs text-gray-600">{p.role}</p></div>
                                 ))}
                             </div>
                         </div>
                     </section>
+                    
+                    <FooterInstitucional />
                 </div>
             );
 
             if (view === 'register') return (
                 <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 animate-fade-in">
                     <div className="bg-white w-full max-w-md rounded-xl shadow-lg overflow-hidden">
-                        <div className="bg-blue-900 p-6 text-white"><h2 className="text-xl font-bold flex items-center gap-2"><Icons.UserCheck/> Inscripción 2026</h2></div>
+                        <div className="bg-blue-900 p-6 text-white text-center flex flex-col items-center">
+                            <LogoMuniIcon className="h-16 w-16 mb-2" color="white" />
+                            <h2 className="text-xl font-bold">Inscripción 2026</h2>
+                        </div>
                         <form onSubmit={handleRegister} className="p-6 space-y-4">
                             <div><label className="block text-sm font-medium text-gray-700">Nombre Completo</label><input required name="nombre" className="w-full mt-1 p-2 border rounded" placeholder="Ej: Juan Pérez" /></div>
                             <div><label className="block text-sm font-medium text-gray-700">Correo Oficial</label><input required name="email" type="email" className="w-full mt-1 p-2 border rounded" placeholder="correo@reconquista.gov.ar" /></div>
-                            <div><label className="block text-sm font-medium text-gray-700">Área</label><select name="area" className="w-full mt-1 p-2 border rounded"><option>Seguridad Vial</option><option>Fiscalización</option><option>Seguridad General</option></select></div>
-                            <button type="submit" className="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 mt-4">Enviar Solicitud</button>
-                            <button type="button" onClick={() => setView('landing')} className="w-full text-gray-500 text-sm mt-2">Cancelar</button>
+                            <div><label className="block text-sm font-medium text-gray-700">Contraseña</label><input required name="password" type="password" className="w-full mt-1 p-2 border rounded" placeholder="Crear una contraseña segura" /></div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Área / Departamento</label>
+                                <select name="area" className="w-full mt-1 p-2 border rounded">
+                                    {AREAS_MUNICIPALES.map((area, i) => <option key={i} value={area}>{area}</option>)}
+                                </select>
+                            </div>
+                            <button type="submit" className="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 mt-4">Registrarse</button>
+                            <button type="button" onClick={() => setView('landing')} className="w-full text-gray-500 text-sm mt-2">Volver</button>
                         </form>
                     </div>
                 </div>
@@ -266,146 +427,91 @@
                         <p className="text-gray-600 mb-6 text-sm">Hola <strong>{user?.name}</strong>. Tu usuario debe ser validado por un administrador.</p>
                         <div className="bg-red-50 border border-red-200 p-4 rounded text-left mb-4">
                             <p className="text-xs font-bold text-red-600 uppercase mb-2">Zona de Demo (Admin)</p>
-                            <button onClick={simulateAdminApproval} className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded text-sm flex items-center justify-center gap-2"><Icons.CheckCircle /> SIMULAR APROBACIÓN</button>
+                            <button onClick={simulateAdminApproval} className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded text-sm flex items-center justify-center gap-2"><Icons.CheckCircle /> SIMULAR APROBACIÓN (Firebase DB)</button>
                         </div>
-                        <button onClick={handleLogout} className="text-blue-600 text-sm underline">Salir</button>
+                        <button onClick={handleLogout} className="text-blue-600 text-sm underline">Cerrar Sesión</button>
                     </div>
                 </div>
             );
 
-            // LAYOUT DEL CAMPUS
+            // DASHBOARD Y MÓDULOS
             const CourseLayout = ({children}) => (
-                <div className="min-h-screen bg-gray-100 flex flex-col font-sans animate-fade-in">
+                <div className="min-h-screen bg-gray-50 flex flex-col font-sans animate-fade-in">
                     <nav className="bg-white shadow-sm border-b sticky top-0 z-20">
                         <div className="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
-                            <div className="flex items-center gap-2 font-bold text-blue-900"><Icons.Shield /> <span>Campus Virtual</span></div>
                             <div className="flex items-center gap-3">
-                                <span className="text-sm font-semibold hidden sm:block text-gray-700">{user?.name}</span>
-                                <button onClick={handleLogout} className="text-gray-400 hover:text-red-600 transition"><Icons.LogOut /></button>
+                                <LogoMuniIcon className="h-8 w-8" />
+                                <span className="font-bold text-blue-900 hidden sm:block">Campus Virtual</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <div className="text-right hidden sm:block">
+                                    <p className="text-sm font-bold text-gray-800">{user?.name}</p>
+                                    <p className="text-xs text-gray-500 truncate w-32">{user?.area}</p>
+                                </div>
+                                <button onClick={handleLogout} className="text-gray-400 hover:text-red-600 transition ml-2" title="Salir"><Icons.LogOut /></button>
                             </div>
                         </div>
                     </nav>
                     <main className="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6">{children}</main>
+                    <FooterInstitucional />
                 </div>
             );
-
-            if (view === 'quiz') {
-                return (
-                    <CourseLayout>
-                         <button onClick={() => setView('module')} className="mb-4 text-gray-500 hover:text-blue-600 text-sm flex items-center gap-1"><div className="rotate-180 transform inline-block"><Icons.ArrowRight /></div> Volver al Módulo</button>
-                         <div className="bg-white rounded-xl shadow-lg overflow-hidden max-w-3xl mx-auto">
-                            <div className="bg-blue-900 text-white p-6">
-                                <h2 className="text-2xl font-bold">Autoevaluación: Ética Pública</h2>
-                                <p className="text-blue-200 text-sm mt-1">Responde Verdadero o Falso. Aprueba con 3/5.</p>
-                            </div>
-                            <div className="p-6 space-y-6">
-                                {QUIZ_MOD_1.map((q, idx) => {
-                                    const userAnswer = quizAnswers[q.id];
-                                    const isCorrect = userAnswer === q.correct;
-                                    
-                                    return (
-                                        <div key={q.id} className="border-b border-gray-100 pb-6 last:border-0 last:pb-0">
-                                            <p className="font-semibold text-gray-800 mb-3">{idx + 1}. {q.question}</p>
-                                            <div className="flex gap-4">
-                                                <label className="radio-label flex-1">
-                                                    <input type="radio" name={`q-${q.id}`} className="radio-input" 
-                                                        checked={userAnswer === true} 
-                                                        onChange={() => handleQuizOptionChange(q.id, true)} 
-                                                        disabled={quizSubmitted}
-                                                    />
-                                                    <div className={`radio-box justify-center ${quizSubmitted && q.correct === true ? 'bg-green-50 border-green-500 text-green-700' : ''} ${quizSubmitted && userAnswer === true && !isCorrect ? 'bg-red-50 border-red-500 text-red-700' : ''}`}>
-                                                        Verdadero
-                                                    </div>
-                                                </label>
-                                                <label className="radio-label flex-1">
-                                                    <input type="radio" name={`q-${q.id}`} className="radio-input" 
-                                                        checked={userAnswer === false} 
-                                                        onChange={() => handleQuizOptionChange(q.id, false)} 
-                                                        disabled={quizSubmitted}
-                                                    />
-                                                    <div className={`radio-box justify-center ${quizSubmitted && q.correct === false ? 'bg-green-50 border-green-500 text-green-700' : ''} ${quizSubmitted && userAnswer === false && !isCorrect ? 'bg-red-50 border-red-500 text-red-700' : ''}`}>
-                                                        Falso
-                                                    </div>
-                                                </label>
-                                            </div>
-                                            {quizSubmitted && !isCorrect && (
-                                                <p className="text-xs text-red-600 mt-2 font-bold">Respuesta Incorrecta</p>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                            <div className="p-6 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-                                {quizSubmitted ? (
-                                    <div className="flex-1 flex items-center justify-between">
-                                        <div>
-                                            <p className="font-bold text-xl">Tu Calificación: <span className={quizScore >= 3 ? "text-green-600" : "text-red-600"}>{quizScore}/5</span></p>
-                                            <p className="text-sm text-gray-500">{quizScore >= 3 ? "¡Aprobado! Tu progreso ha sido actualizado." : "Inténtalo nuevamente."}</p>
-                                        </div>
-                                        <button onClick={() => setView('dashboard')} className="bg-blue-600 text-white px-6 py-2 rounded font-bold hover:bg-blue-700">Volver al Campus</button>
-                                    </div>
-                                ) : (
-                                    <button 
-                                        onClick={submitQuiz} 
-                                        disabled={Object.keys(quizAnswers).length < 5}
-                                        className="w-full bg-blue-600 text-white py-3 rounded font-bold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                                    >
-                                        Enviar Examen
-                                    </button>
-                                )}
-                            </div>
-                         </div>
-                    </CourseLayout>
-                );
-            }
 
             if (view === 'dashboard') return (
                 <CourseLayout>
                     <div className="mb-6">
                         <h1 className="text-2xl font-bold text-gray-800 mb-4">Panel del Alumno</h1>
-                        <div className="flex border-b border-gray-300 space-x-6">
-                            <button type="button" onClick={() => setDashboardTab('modules')} className={`pb-2 text-sm font-bold transition-colors border-b-2 ${dashboardTab === 'modules' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Mis Cursos</button>
-                            <button type="button" onClick={() => setDashboardTab('info')} className={`pb-2 text-sm font-bold transition-colors border-b-2 ${dashboardTab === 'info' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>Información del Curso</button>
+                        <div className="flex border-b border-gray-300 space-x-6 overflow-x-auto">
+                            <button onClick={() => setDashboardTab('modules')} className={`pb-2 text-sm font-bold border-b-2 ${dashboardTab === 'modules' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'}`}>Mis Cursos</button>
+                            <button onClick={() => setDashboardTab('info')} className={`pb-2 text-sm font-bold border-b-2 ${dashboardTab === 'info' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'}`}>Información</button>
+                            <button onClick={() => setDashboardTab('team')} className={`pb-2 text-sm font-bold border-b-2 ${dashboardTab === 'team' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'}`}>Autoridades</button>
                         </div>
                     </div>
-
-                    {dashboardTab === 'info' ? (
+                    {dashboardTab === 'info' && (
                         <div className="animate-fade-in space-y-6">
-                            <div className="bg-gradient-to-br from-blue-800 to-blue-600 text-white rounded-xl p-6 md:p-8 shadow-lg flex flex-col md:flex-row items-center gap-6">
-                                <div className="w-20 h-20 bg-blue-300 rounded-full flex-shrink-0 border-4 border-blue-200 overflow-hidden bg-gray-200 flex items-center justify-center text-blue-800 font-bold">AV</div>
-                                <div className="flex-1 text-center md:text-left">
-                                    <h2 className="text-2xl font-bold mb-2">"Bienvenidos a la profesionalización"</h2>
-                                    <p className="text-blue-100 italic mb-2">"Queremos inspectores orgullosos de su función. Esta herramienta es para ustedes, para que cuenten con todo el respaldo teórico y técnico."</p>
-                                    <p className="text-xs font-bold text-blue-200 uppercase tracking-wider">Dr. Amadeo Enrique Vallejos — Intendente</p>
+                             <div className="bg-gradient-to-br from-blue-900 to-blue-700 text-white rounded-xl p-8 shadow-lg flex flex-col md:flex-row items-center gap-6">
+                                <div className="w-24 h-24 rounded-full border-4 border-white/20 bg-white shadow-lg overflow-hidden flex items-center justify-center">
+                                    <LogoSecretariaCuadrado className="w-full h-full" />
                                 </div>
-                            </div>
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div className="bg-white p-6 rounded-xl shadow-sm border">
-                                    <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2"><span className="text-blue-600"><Icons.Users/></span> Destinatarios</h3>
-                                    <p className="text-sm text-gray-600">Agentes de Seguridad Vial, Fiscalización Externa y Seguridad. Contenido adaptado a todos los niveles de formación.</p>
-                                </div>
-                                <div className="bg-white p-6 rounded-xl shadow-sm border">
-                                    <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2"><span className="text-blue-600"><Icons.Calendar/></span> Modalidad</h3>
-                                    <p className="text-sm text-gray-600">Formato híbrido y asincrónico. Disponible todo el año 2026. Estudia a tu propio ritmo.</p>
+                                <div className="text-center md:text-left">
+                                    <h2 className="text-2xl font-bold">"Bienvenidos a la profesionalización"</h2>
+                                    <p className="text-blue-100 italic mt-2">"Queremos inspectores orgullosos de su función. Esta herramienta es para ustedes, para que cuenten con todo el respaldo teórico y técnico."</p>
+                                    <p className="text-sm font-bold text-yellow-400 mt-3 uppercase tracking-wider">Dr. Amadeo Enrique Vallejos — Intendente</p>
                                 </div>
                             </div>
                         </div>
-                    ) : (
+                    )}
+                    {dashboardTab === 'team' && (
+                        <div className="animate-fade-in space-y-6">
+                            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+                                <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Dirección y Organización del Proyecto</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    {AUTORIDADES.map((auth, i) => (
+                                        <div key={i} className="p-6 bg-gray-50 rounded-xl border border-gray-100 text-center hover:shadow-md transition">
+                                            <div className="w-16 h-16 bg-blue-100 rounded-full mx-auto flex items-center justify-center mb-4 text-blue-600">
+                                                <Icons.Users />
+                                            </div>
+                                            <h3 className="font-bold text-blue-900 text-lg">{auth.name}</h3>
+                                            <p className="text-sm text-gray-600 mt-1 font-medium">{auth.role}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {dashboardTab === 'modules' && (
                         <div className="animate-fade-in">
                              <div className="bg-white p-6 rounded-lg shadow-sm mb-6 border">
-                                <div className="flex justify-between text-sm mb-2"><span className="font-bold text-gray-700">Progreso</span><span className="font-bold text-blue-600">{progress}%</span></div>
-                                <div className="w-full bg-gray-200 rounded-full h-2"><div className="bg-blue-600 h-2 rounded-full transition-all duration-1000" style={{width: `${progress}%`}}></div></div>
+                                <div className="flex justify-between text-sm mb-2"><span className="font-bold text-gray-700">Progreso</span><span className="font-bold text-blue-600">{user?.progress || 0}%</span></div>
+                                <div className="w-full bg-gray-200 rounded-full h-2"><div className="bg-blue-600 h-2 rounded-full transition-all duration-1000" style={{width: `${user?.progress || 0}%`}}></div></div>
                             </div>
                             <div className="grid md:grid-cols-2 gap-4">
                                 {COURSE_DATA.map((mod) => (
                                     <div key={mod.id} className="bg-white p-5 rounded-lg shadow-sm border hover:shadow-md transition flex flex-col">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">MÓDULO 0{mod.id}</span>
-                                            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Disponible</span>
-                                        </div>
+                                        <div className="flex justify-between mb-2"><span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded">MÓDULO 0{mod.id}</span></div>
                                         <h3 className="font-bold text-lg mb-2 text-gray-800">{mod.title}</h3>
                                         <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-1">{mod.description}</p>
-                                        <button onClick={() => {setActiveModule(mod.id); setView('module'); setExpandedTopic(null);}} className="text-blue-600 font-bold text-sm flex items-center gap-1 hover:text-blue-800 mt-auto">Ingresar <Icons.ArrowRight/></button>
+                                        <button onClick={() => {setActiveModule(mod.id); setView('module'); setExpandedTopic(null);}} className="text-blue-600 font-bold text-sm flex items-center gap-1 mt-auto">Ingresar <Icons.ArrowRight/></button>
                                     </div>
                                 ))}
                             </div>
@@ -415,66 +521,77 @@
             );
 
             if (view === 'module') {
-                const mod = COURSE_DATA.find(m => m.id === activeModule);
-                return (
+                 const mod = COURSE_DATA.find(m => m.id === activeModule);
+                 return (
                     <CourseLayout>
-                        <button onClick={() => setView('dashboard')} className="mb-4 text-gray-500 hover:text-blue-600 text-sm flex items-center gap-1"><div className="rotate-180 transform inline-block"><Icons.ArrowRight /></div> Volver al Panel</button>
+                        <button onClick={() => setView('dashboard')} className="mb-4 text-gray-500 hover:text-blue-600 text-sm flex items-center gap-1"><div className="rotate-180 inline-block"><Icons.ArrowRight /></div> Volver al Panel</button>
                         <div className="bg-white rounded-xl shadow overflow-hidden animate-fade-in">
-                            <div className="bg-blue-900 text-white p-6">
-                                <span className="text-xs font-bold text-blue-300 tracking-wider">MÓDULO {mod.id}</span>
-                                <h2 className="text-2xl font-bold mt-1">{mod.title}</h2>
-                                <p className="text-blue-100 mt-2 text-sm">{mod.description}</p>
-                            </div>
+                            <div className="bg-blue-900 text-white p-6"><h2 className="text-2xl font-bold">{mod.title}</h2></div>
                             <div className="divide-y divide-gray-100">
                                 {mod.topics.map(topic => {
                                     const isOpen = expandedTopic === topic.id;
                                     return (
-                                        <div key={topic.id} className={`transition-colors ${isOpen ? "bg-blue-50/50" : "bg-white hover:bg-gray-50"}`}>
+                                        <div key={topic.id} className={isOpen ? "bg-blue-50/50" : "bg-white hover:bg-gray-50"}>
                                             <button onClick={() => setExpandedTopic(isOpen ? null : topic.id)} className="w-full px-6 py-4 flex items-center justify-between text-left">
-                                                <span className={`font-semibold ${isOpen ? 'text-blue-800' : 'text-gray-700'}`}>{topic.id} {topic.title}</span>
-                                                <div className={isOpen ? "text-blue-600" : "text-gray-400"}>{isOpen ? <Icons.ChevronUp /> : <Icons.ChevronDown />}</div>
+                                                <span className="font-semibold text-gray-700">{topic.id} {topic.title}</span>
+                                                <div>{isOpen ? <Icons.ChevronUp /> : <Icons.ChevronDown />}</div>
                                             </button>
-                                            {isOpen && (
-                                                <div className="px-6 pb-6 pl-10 text-sm animate-fade-in">
-                                                    <p className="text-gray-700 mb-4 leading-relaxed text-justify">{topic.content}</p>
-                                                    <div className="bg-white border border-gray-200 p-3 rounded-lg">
-                                                        <p className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Material de Estudio</p>
-                                                        <div className="space-y-2">
-                                                            {topic.resources.map((res, idx) => (
-                                                                <div key={idx} className="flex items-center gap-2 text-blue-700 cursor-pointer hover:underline p-1 rounded hover:bg-gray-50">
-                                                                    <ResourceIcon type={res.type}/> <span className="font-medium">{res.label}</span>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
+                                            {isOpen && <div className="px-6 pb-6 pl-10 text-sm text-gray-700">{topic.content}
+                                                <div className="mt-3 space-y-2">
+                                                    {topic.resources.map((res, i) => (
+                                                        <a 
+                                                            key={i} 
+                                                            href={res.url || "#"} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer"
+                                                            className="flex items-center gap-2 text-blue-600 hover:underline hover:bg-blue-50 p-2 rounded transition cursor-pointer"
+                                                        >
+                                                            <ResourceIcon type={res.type}/> 
+                                                            <span>{res.label}</span>
+                                                        </a>
+                                                    ))}
                                                 </div>
-                                            )}
+                                            </div>}
                                         </div>
                                     );
                                 })}
                             </div>
-                            <div className="p-6 bg-gray-50 text-center border-t">
-                                <button 
-                                    onClick={() => {
-                                        if (mod.id === 1) {
-                                            setQuizAnswers({});
-                                            setQuizSubmitted(false);
-                                            setView('quiz');
-                                        } else {
-                                            alert("El examen para este módulo estará disponible próximamente.");
-                                        }
-                                    }} 
-                                    className="bg-white border-2 border-blue-600 text-blue-600 px-6 py-2 rounded-full text-sm font-bold hover:bg-blue-50 flex items-center justify-center gap-2 mx-auto"
-                                >
-                                    <Icons.GraduationCap /> Realizar Autoevaluación
-                                </button>
+                            <div className="p-6 border-t text-center">
+                                <button onClick={() => mod.id === 1 ? setView('quiz') : alert("Próximamente")} className="bg-white border-2 border-blue-600 text-blue-600 px-6 py-2 rounded-full font-bold hover:bg-blue-50 inline-flex items-center gap-2"><Icons.GraduationCap /> Autoevaluación</button>
                             </div>
                         </div>
                     </CourseLayout>
-                );
+                 );
             }
 
-            return <div className="flex items-center justify-center h-screen">Cargando sistema...</div>;
+            if (view === 'quiz') {
+                 return (
+                    <CourseLayout>
+                         <div className="max-w-2xl mx-auto bg-white rounded-xl shadow p-6">
+                            <h2 className="text-xl font-bold mb-4">Examen Módulo 1</h2>
+                            {QUIZ_MOD_1.map((q) => (
+                                <div key={q.id} className="mb-4 border-b pb-4">
+                                    <p className="mb-2">{q.question}</p>
+                                    <div className="flex gap-4">
+                                        <button onClick={() => !quizSubmitted && setQuizAnswers({...quizAnswers, [q.id]: true})} className={`flex-1 p-2 border rounded ${quizAnswers[q.id] === true ? 'bg-blue-100 border-blue-500' : ''}`}>Verdadero</button>
+                                        <button onClick={() => !quizSubmitted && setQuizAnswers({...quizAnswers, [q.id]: false})} className={`flex-1 p-2 border rounded ${quizAnswers[q.id] === false ? 'bg-blue-100 border-blue-500' : ''}`}>Falso</button>
+                                    </div>
+                                </div>
+                            ))}
+                            {!quizSubmitted ? (
+                                <button onClick={submitQuiz} className="w-full bg-blue-600 text-white font-bold py-2 rounded">Enviar</button>
+                            ) : (
+                                <div className="text-center">
+                                    <p className="text-xl font-bold">Nota: {quizScore}/5</p>
+                                    <button onClick={() => setView('dashboard')} className="mt-4 text-blue-600 underline">Volver</button>
+                                </div>
+                            )}
+                         </div>
+                    </CourseLayout>
+                 );
+            }
+
+            return null;
         };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -482,3 +599,4 @@
     </script>
 </body>
 </html>
+
