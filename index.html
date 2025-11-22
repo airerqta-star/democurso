@@ -154,11 +154,42 @@
             Send: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         };
 
-        const ResourceIcon = ({ type }) => {
-            const style = { pdf: "text-red-500", video: "text-red-600", presentation: "text-orange-500", link: "text-blue-500", image: "text-purple-500" }[type] || "text-gray-500";
-            const IconComp = { pdf: Icons.FileText, video: Icons.Video, presentation: Icons.Monitor, link: Icons.BookOpen, image: Icons.BookOpen }[type] || Icons.FileText;
-            return <div className={style}><IconComp size={16} /></div>;
-        };
+        // --- COMPONENTES EXTRAÍDOS ---
+        // Se extraen para evitar que se vuelvan a montar al escribir en el input, lo que causaba pérdida de foco.
+
+        const FooterInstitucional = () => (
+            <footer className="bg-gray-800 text-gray-400 py-8 px-4 border-t border-gray-700 mt-auto">
+                <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center gap-6 text-center">
+                    <div className="flex flex-col items-center">
+                        <p className="text-xs uppercase tracking-widest font-semibold text-gray-500 mb-2">Con el apoyo técnico y supervisión de</p>
+                        <div className="bg-transparent p-1 rounded"><LogoAGC className="h-10 w-auto" /></div>
+                    </div>
+                </div>
+                <p className="text-center text-xs text-gray-600 mt-8">© 2026 Sistema de Capacitación Municipal. Desarrollo interno.</p>
+            </footer>
+        );
+
+        const CourseLayout = ({children, user, handleLogout}) => (
+            <div className="min-h-screen bg-gray-100 flex flex-col font-sans animate-fade-in">
+                <nav className="bg-white shadow-sm border-b sticky top-0 z-20">
+                    <div className="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                            <LogoMuniIcon className="h-8 w-8" />
+                            <span className="font-bold text-blue-900 hidden sm:block">Campus Virtual</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="text-right hidden sm:block">
+                                <p className="text-sm font-bold text-gray-800">{user?.name}</p>
+                                <p className="text-xs text-gray-500 truncate w-32">{user?.area}</p>
+                            </div>
+                            <button onClick={handleLogout} className="text-gray-400 hover:text-red-600 transition ml-2" title="Salir"><Icons.LogOut /></button>
+                        </div>
+                    </div>
+                </nav>
+                <main className="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6">{children}</main>
+                <FooterInstitucional />
+            </div>
+        );
 
         const App = () => {
             const [view, setView] = useState('landing');
@@ -277,23 +308,11 @@
                         userId: user.uid,
                         userName: user.name,
                         userArea: user.area,
-                        timestamp: new Date() // Usar serverTimestamp en prod
+                        timestamp: new Date()
                     });
                     setNewPost("");
                 } catch(err) { console.error(err); }
             };
-
-            const FooterInstitucional = () => (
-                <footer className="bg-gray-800 text-gray-400 py-8 px-4 border-t border-gray-700 mt-auto">
-                    <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-center gap-6 text-center">
-                        <div className="flex flex-col items-center">
-                            <p className="text-xs uppercase tracking-widest font-semibold text-gray-500 mb-2">Con el apoyo técnico y supervisión de</p>
-                            <div className="bg-transparent p-1 rounded"><LogoAGC className="h-10 w-auto" /></div>
-                        </div>
-                    </div>
-                    <p className="text-center text-xs text-gray-600 mt-8">© 2026 Sistema de Capacitación Municipal. Desarrollo interno.</p>
-                </footer>
-            );
 
             if (loading) return <div className="h-screen flex items-center justify-center text-blue-600 font-bold animate-pulse">Conectando con Campus Reconquista...</div>;
 
@@ -369,30 +388,8 @@
                 </div>
             );
 
-            const CourseLayout = ({children}) => (
-                <div className="min-h-screen bg-gray-50 flex flex-col font-sans animate-fade-in">
-                    <nav className="bg-white shadow-sm border-b sticky top-0 z-20">
-                        <div className="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                                <LogoMuniIcon className="h-8 w-8" />
-                                <span className="font-bold text-blue-900 hidden sm:block">Campus Virtual</span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <div className="text-right hidden sm:block">
-                                    <p className="text-sm font-bold text-gray-800">{user?.name}</p>
-                                    <p className="text-xs text-gray-500 truncate w-32">{user?.area}</p>
-                                </div>
-                                <button onClick={handleLogout} className="text-gray-400 hover:text-red-600 transition ml-2" title="Salir"><Icons.LogOut /></button>
-                            </div>
-                        </div>
-                    </nav>
-                    <main className="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6">{children}</main>
-                    <FooterInstitucional />
-                </div>
-            );
-
             if (view === 'dashboard') return (
-                <CourseLayout>
+                <CourseLayout user={user} handleLogout={handleLogout}>
                     <div className="mb-6">
                         <h1 className="text-2xl font-bold text-gray-800 mb-4">Panel del Alumno</h1>
                         <div className="flex border-b border-gray-300 space-x-6 overflow-x-auto">
@@ -458,7 +455,6 @@
                                                     {post.timestamp && <span className="text-xs text-gray-400">{new Date(post.timestamp.seconds * 1000).toLocaleDateString()}</span>}
                                                 </div>
                                                 <p className="text-gray-700">{post.text}</p>
-                                                {/* Aquí irían las respuestas en una versión v2 */}
                                             </div>
                                         ))
                                     )}
@@ -507,7 +503,7 @@
             if (view === 'module') {
                  const mod = COURSE_DATA.find(m => m.id === activeModule);
                  return (
-                    <CourseLayout>
+                    <CourseLayout user={user} handleLogout={handleLogout}>
                         <button onClick={() => setView('dashboard')} className="mb-4 text-gray-500 hover:text-blue-600 text-sm flex items-center gap-1"><div className="rotate-180 inline-block"><Icons.ArrowRight /></div> Volver al Panel</button>
                         <div className="bg-white rounded-xl shadow overflow-hidden animate-fade-in">
                             <div className="bg-blue-900 text-white p-6"><h2 className="text-2xl font-bold">{mod.title}</h2></div>
@@ -550,7 +546,7 @@
 
             if (view === 'quiz') {
                  return (
-                    <CourseLayout>
+                    <CourseLayout user={user} handleLogout={handleLogout}>
                          <div className="max-w-2xl mx-auto bg-white rounded-xl shadow p-6">
                             <h2 className="text-xl font-bold mb-4">Examen Módulo 1</h2>
                             {QUIZ_MOD_1.map((q) => (
@@ -583,5 +579,6 @@
     </script>
 </body>
 </html>
+
 
 
