@@ -31,43 +31,17 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- 1. DEFINICIÓN DE ICONOS ---
-        const Icons = {
-            Shield: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
-            UserCheck: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>,
-            BookOpen: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
-            CheckCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
-            Users: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-            Lock: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
-            LogOut: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
-            ArrowRight: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>,
-            ChevronDown: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>,
-            ChevronUp: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>,
-            GraduationCap: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
-            FileText: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
-            Video: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>,
-            Monitor: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
-            Calendar: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
-            MessageSquare: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-            Send: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>,
-            Reply: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
+        // --- IMÁGENES (FOTOS REALES) ---
+        const PHOTOS = {
+            curso_alusiva: "https://drive.google.com/uc?export=view&id=1ImtIF5lDDRjid4ZiRvtwlBdXVnIWBG8G",
+            intendente: "https://drive.google.com/uc?export=view&id=1JdM2FPygXVpxjkHJpgaf3Q6D5V9P2h17",
+            sandrigo: "https://drive.google.com/uc?export=view&id=1p2ZqfTZVQxabNWyVxkZ6GVDBOsGIqVEF",
+            franco: "https://drive.google.com/uc?export=view&id=1mHMQYEIW2PLouZ03y5QEDvOvHPQe3c9C",
+            caceres: "https://drive.google.com/uc?export=view&id=1UKJFxfOyi10oSRq6Oacej6JEFnjPxj2T",
+            muni_frente: "https://drive.google.com/uc?export=view&id=1YtzyVuwCd1AyHE0BcBPvfie3w3X0cCjE"
         };
 
-        // --- 2. COMPONENTE RESOURCE ICON ---
-        const ResourceIcon = ({ type }) => {
-            let IconComp = Icons.FileText;
-            let style = "text-gray-500";
-            switch(type) {
-                case 'pdf': IconComp = Icons.FileText; style = "text-red-500"; break;
-                case 'video': IconComp = Icons.Video; style = "text-red-600"; break;
-                case 'presentation': IconComp = Icons.Monitor; style = "text-orange-500"; break;
-                case 'link': IconComp = Icons.BookOpen; style = "text-blue-500"; break;
-                case 'image': IconComp = Icons.BookOpen; style = "text-purple-500"; break;
-            }
-            return <div className={style}><IconComp size={16} /></div>;
-        };
-
-        // --- 3. LOGOS SVG ---
+        // --- LOGOS SVG ---
         const LogoMuniHorizontal = ({ className }) => (
             <svg viewBox="0 0 280 60" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="0" y="10" width="5" height="40" fill="#EAB308" />
@@ -86,13 +60,6 @@
                 <rect width="300" height="50" rx="4" fill="#1E40AF" />
                 <text x="150" y="18" fontFamily="Arial, sans-serif" fontSize="9" fill="#BFDBFE" textAnchor="middle" letterSpacing="1">SECRETARÍA DE</text>
                 <text x="150" y="38" fontFamily="Arial, sans-serif" fontSize="18" fill="#FFFFFF" textAnchor="middle" fontWeight="bold">CONTROL PÚBLICO</text>
-            </svg>
-        );
-        const LogoSecretariaCuadrado = ({ className }) => (
-            <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="100" height="100" fill="#1E3A8A" />
-                <text x="50" y="40" fontFamily="Arial, sans-serif" fontSize="10" fill="#EAB308" textAnchor="middle">SECRETARÍA</text>
-                <text x="50" y="70" fontFamily="Arial, sans-serif" fontSize="20" fill="#FFFFFF" textAnchor="middle" fontWeight="bold">CONTROL</text>
             </svg>
         );
         const LogoAGC = ({ className }) => (
@@ -132,10 +99,10 @@
             "ASPIRANTE (Externo)"
         ];
 
-        const AUTORIDADES = [
-            { name: "Lic. Nicolás Sandrigo", role: "Secretaría de Control Público" },
-            { name: "Dra. Soledad Cáceres", role: "Juzgado Municipal de Faltas" },
-            { name: "Dr. Ricardo Franco", role: "Agencia Gubernamental de Control" }
+        const ORGANIZADORES = [
+            { name: "Lic. Nicolás Sandrigo", role: "Secretaría de Control Público", photo: PHOTOS.sandrigo },
+            { name: "Dra. Soledad Cáceres", role: "Juzgado Municipal de Faltas", photo: PHOTOS.caceres },
+            { name: "Dr. Ricardo Franco", role: "Agencia Gubernamental de Control", photo: PHOTOS.franco }
         ];
 
         const COURSE_DATA = [
@@ -169,6 +136,40 @@
             { id: 4, question: "La Comisión Provincial de Ética Pública depende jerárquicamente del Poder Ejecutivo.", correct: false },
             { id: 5, question: "Existen excepciones reglamentadas a la prohibición de recibir obsequios (ej. cortesía diplomática).", correct: true }
         ];
+
+        const Icons = {
+            Shield: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+            UserCheck: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>,
+            BookOpen: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+            CheckCircle: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+            Users: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+            Lock: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+            LogOut: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
+            ArrowRight: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>,
+            ChevronDown: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>,
+            ChevronUp: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>,
+            GraduationCap: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
+            FileText: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
+            Video: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>,
+            Monitor: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>,
+            Calendar: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+            MessageSquare: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+            Send: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>,
+            Reply: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 17 4 12 9 7"></polyline><path d="M20 18v-2a4 4 0 0 0-4-4H4"></path></svg>
+        };
+
+        const ResourceIcon = ({ type }) => {
+            let IconComp = Icons.FileText;
+            let style = "text-gray-500";
+            switch(type) {
+                case 'pdf': IconComp = Icons.FileText; style = "text-red-500"; break;
+                case 'video': IconComp = Icons.Video; style = "text-red-600"; break;
+                case 'presentation': IconComp = Icons.Monitor; style = "text-orange-500"; break;
+                case 'link': IconComp = Icons.BookOpen; style = "text-blue-500"; break;
+                case 'image': IconComp = Icons.BookOpen; style = "text-purple-500"; break;
+            }
+            return <div className={style}><IconComp size={16} /></div>;
+        };
 
         // --- COMPONENTES DE LAYOUT ---
 
@@ -218,7 +219,6 @@
             const [quizSubmitted, setQuizSubmitted] = useState(false);
             const [quizScore, setQuizScore] = useState(0);
             
-            // ESTADOS FORO Y PARTICIPANTES
             const [forumPosts, setForumPosts] = useState([]);
             const [newPost, setNewPost] = useState("");
             const [replyingTo, setReplyingTo] = useState(null);
@@ -239,7 +239,6 @@
                 return () => unsubscribe();
             }, []);
 
-            // LISTENER DEL FORO
             useEffect(() => {
                 if (view === 'dashboard' && dashboardTab === 'forum') {
                     const unsubscribe = db.collection('FORO')
@@ -252,7 +251,6 @@
                 }
             }, [view, dashboardTab]);
 
-            // LISTENER DE PARTICIPANTES
             useEffect(() => {
                 if (view === 'dashboard' && dashboardTab === 'participants') {
                     const unsubscribe = db.collection('USUARIOS')
@@ -373,16 +371,24 @@
                              <div className="hidden md:block"><LogoSecretariaBanner className="h-12 w-auto" /></div>
                          </div>
                     </header>
-                    <div className="bg-gradient-to-r from-blue-900 to-blue-800 text-white py-16 px-4 text-center relative overflow-hidden flex-grow">
-                        <div className="max-w-4xl mx-auto relative z-10">
+                    
+                    {/* HERO CON FOTO DE FONDO */}
+                    <div className="relative bg-blue-900 text-white py-20 px-4 flex-grow flex flex-col justify-center items-center overflow-hidden">
+                        <div className="absolute inset-0 z-0">
+                            <img src={PHOTOS.muni_frente} alt="Municipalidad" className="w-full h-full object-cover opacity-20" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-blue-800/80"></div>
+                        </div>
+                        
+                        <div className="max-w-4xl mx-auto relative z-10 text-center">
                             <div className="md:hidden mb-8 flex justify-center"><LogoSecretariaBanner className="h-12 w-auto" /></div>
-                            <h1 className="text-4xl md:text-6xl font-extrabold mb-6">CURSO DE CAPACITACIÓN <br/> PARA INSPECTORES</h1>
-                            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">Plataforma oficial de formación continua.</p>
+                            <h1 className="text-4xl md:text-6xl font-extrabold mb-6 drop-shadow-lg">CURSO DE CAPACITACIÓN <br/> PARA INSPECTORES</h1>
+                            <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto drop-shadow-md">Plataforma oficial de formación continua y profesionalización del cuerpo de inspectores municipales.</p>
+                            
                             <div className="bg-white/10 backdrop-blur-md p-6 rounded-xl max-w-md mx-auto border border-white/20 shadow-2xl">
                                 <form onSubmit={handleLogin} className="space-y-3 text-left">
-                                    <input name="email" type="email" placeholder="Correo electrónico" required className="w-full p-2 rounded text-gray-800 bg-white/95 outline-none" />
-                                    <input name="password" type="password" placeholder="Contraseña" required className="w-full p-2 rounded text-gray-800 bg-white/95 outline-none" />
-                                    <button className="w-full bg-yellow-500 hover:bg-yellow-400 text-blue-900 font-bold py-2 rounded transition transform active:scale-95">Ingresar</button>
+                                    <input name="email" type="email" placeholder="Correo electrónico" required className="w-full p-2 rounded text-gray-800 bg-white/95 outline-none focus:ring-2 focus:ring-yellow-400" />
+                                    <input name="password" type="password" placeholder="Contraseña" required className="w-full p-2 rounded text-gray-800 bg-white/95 outline-none focus:ring-2 focus:ring-yellow-400" />
+                                    <button className="w-full bg-yellow-500 hover:bg-yellow-400 text-blue-900 font-bold py-2 rounded transition transform active:scale-95 shadow-lg">Ingresar</button>
                                 </form>
                                 <div className="mt-4 text-sm border-t border-white/20 pt-3 flex justify-between items-center">
                                     <span className="text-blue-200">¿Primera vez?</span>
@@ -391,11 +397,12 @@
                             </div>
                         </div>
                     </div>
-                    <section className="py-12 bg-white border-b">
+
+                    <section className="py-12 bg-white border-b relative z-10">
                         <div className="max-w-5xl mx-auto px-4">
-                            <h3 className="text-center text-gray-500 font-bold uppercase text-xs mb-8 tracking-widest">Dirección y Organización</h3>
+                            <h3 className="text-center text-gray-500 font-bold uppercase text-xs mb-8 tracking-widest">Organización</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                                {AUTORIDADES.map((p,i)=> (<div key={i} className="p-4 bg-gray-50 rounded border"><p className="font-bold text-blue-900">{p.name}</p><p className="text-xs text-gray-600">{p.role}</p></div>))}
+                                {ORGANIZADORES.map((p,i)=> (<div key={i} className="p-4 bg-gray-50 rounded border border-gray-100"><p className="font-bold text-blue-900">{p.name}</p><p className="text-xs text-gray-600">{p.role}</p></div>))}
                             </div>
                         </div>
                     </section>
@@ -444,7 +451,7 @@
                         <div className="flex border-b border-gray-300 space-x-4 overflow-x-auto">
                             <button onClick={() => setDashboardTab('modules')} className={`pb-2 text-sm font-bold border-b-2 px-2 whitespace-nowrap ${dashboardTab === 'modules' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'}`}>Mis Cursos</button>
                             <button onClick={() => setDashboardTab('info')} className={`pb-2 text-sm font-bold border-b-2 px-2 whitespace-nowrap ${dashboardTab === 'info' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'}`}>Información</button>
-                            <button onClick={() => setDashboardTab('team')} className={`pb-2 text-sm font-bold border-b-2 px-2 whitespace-nowrap ${dashboardTab === 'team' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'}`}>Autoridades</button>
+                            <button onClick={() => setDashboardTab('team')} className={`pb-2 text-sm font-bold border-b-2 px-2 whitespace-nowrap ${dashboardTab === 'team' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'}`}>Organizadores</button>
                             <button onClick={() => setDashboardTab('participants')} className={`pb-2 text-sm font-bold border-b-2 px-2 whitespace-nowrap ${dashboardTab === 'participants' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 flex items-center gap-1'} `}><Icons.Users size={14}/> Participantes</button>
                             <button onClick={() => setDashboardTab('forum')} className={`pb-2 text-sm font-bold border-b-2 px-2 whitespace-nowrap ${dashboardTab === 'forum' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 flex items-center gap-1'} `}><Icons.MessageSquare size={14}/> Foro</button>
                         </div>
@@ -452,15 +459,17 @@
                     
                     {dashboardTab === 'info' && (
                         <div className="animate-fade-in space-y-6">
-                             <div className="bg-gradient-to-br from-blue-900 to-blue-700 text-white rounded-xl p-8 shadow-lg flex flex-col md:flex-row items-center gap-6">
-                                <div className="w-24 h-24 rounded-full border-4 border-white/20 bg-white shadow-lg overflow-hidden flex items-center justify-center">
-                                    <LogoSecretariaCuadrado className="w-full h-full" />
+                             <div className="bg-gradient-to-br from-blue-900 to-blue-700 text-white rounded-xl p-8 shadow-lg flex flex-col md:flex-row items-center gap-6 relative overflow-hidden">
+                                <div className="w-32 h-32 rounded-full border-4 border-white/30 shadow-lg overflow-hidden flex-shrink-0 relative z-10">
+                                    <img src={PHOTOS.intendente} alt="Intendente" className="w-full h-full object-cover" />
                                 </div>
-                                <div className="text-center md:text-left">
+                                <div className="text-center md:text-left relative z-10">
                                     <h2 className="text-2xl font-bold">"Bienvenidos a la profesionalización"</h2>
-                                    <p className="text-blue-100 italic mt-2">"Queremos inspectores orgullosos de su función. Esta herramienta es para ustedes, para que cuenten con todo el respaldo teórico y técnico."</p>
+                                    <p className="text-blue-100 italic mt-3 text-lg">"Queremos inspectores orgullosos de su función. Esta herramienta es para ustedes, para que cuenten con todo el respaldo teórico y técnico en su tarea diaria."</p>
                                     <p className="text-sm font-bold text-yellow-400 mt-3 uppercase tracking-wider">Dr. Amadeo Enrique Vallejos — Intendente</p>
                                 </div>
+                                {/* Fondo decorativo */}
+                                <div className="absolute right-0 bottom-0 w-64 h-64 bg-white/5 rounded-full -mr-16 -mb-16 z-0"></div>
                             </div>
                         </div>
                     )}
@@ -468,13 +477,15 @@
                     {dashboardTab === 'team' && (
                         <div className="animate-fade-in space-y-6">
                             <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-                                <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Dirección y Organización del Proyecto</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    {AUTORIDADES.map((auth, i) => (
-                                        <div key={i} className="p-6 bg-gray-50 rounded-xl border border-gray-100 text-center hover:shadow-md transition">
-                                            <div className="w-16 h-16 bg-blue-100 rounded-full mx-auto flex items-center justify-center mb-4 text-blue-600"><Icons.Users /></div>
+                                <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">Organizadores del Proyecto</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    {ORGANIZADORES.map((auth, i) => (
+                                        <div key={i} className="flex flex-col items-center text-center group">
+                                            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-100 shadow-sm group-hover:shadow-md transition mb-4">
+                                                <img src={auth.photo} alt={auth.name} className="w-full h-full object-cover" />
+                                            </div>
                                             <h3 className="font-bold text-blue-900 text-lg">{auth.name}</h3>
-                                            <p className="text-sm text-gray-600 mt-1 font-medium">{auth.role}</p>
+                                            <p className="text-sm text-gray-500 font-medium mt-1 uppercase tracking-wide">{auth.role}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -498,7 +509,7 @@
                                     ) : (
                                         participants.map((p, idx) => (
                                             <div key={idx} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex items-center gap-4">
-                                                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold text-gray-500">
+                                                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold text-gray-500 text-sm">
                                                     {p.name.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
@@ -699,6 +710,7 @@
     </script>
 </body>
 </html>
+
 
 
 
