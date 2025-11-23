@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Curso de Capacitación - Inspectores Reconquista</title>
-    <!-- Favicon -->
-    <link rel="icon" href="https://raw.githubusercontent.com/airerqta-star/democurso/e298c1542738897141dd037a47507972c6af4656/img/favicon.png" type="image/png">
+    <!-- Favicon (Cloudinary) -->
+    <link rel="icon" href="https://res.cloudinary.com/dthg9wo6r/image/upload/v1763864223/cropped-RECO_Magenta-Favicon-32x32_ppqphl.png" type="image/png">
     
     <!-- LIBRERÍAS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -37,22 +37,22 @@
         const { useState, useEffect, useRef } = React;
 
         // ==========================================
-        // 1. CONFIGURACIÓN DE IMÁGENES (GITHUB RAW)
+        // 1. CONFIGURACIÓN DE IMÁGENES
         // ==========================================
 
-        // URL Base apuntando al commit específico donde subiste las imágenes
+        // URL Base de GitHub para los logos (que aún no están en Cloudinary)
         const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/airerqta-star/democurso/e298c1542738897141dd037a47507972c6af4656/img";
 
         const PHOTOS = {
-            // Imágenes Actualizadas según tus enlaces
-            curso_alusiva: `${GITHUB_RAW_BASE}/portada.png`,
-            intendente: `${GITHUB_RAW_BASE}/intendente_vallejos2.jpg`,
-            sandrigo: `${GITHUB_RAW_BASE}/nico_sandrigo.png`,
-            franco: `${GITHUB_RAW_BASE}/ricardo_franco.jpg`,
-            caceres: `${GITHUB_RAW_BASE}/sole_caceres.png`,
-            muni_frente: `${GITHUB_RAW_BASE}/frentemuni.png`,
+            // --- CLOUDINARY (Alta Velocidad) ---
+            intendente: "https://res.cloudinary.com/dthg9wo6r/image/upload/v1763864224/intendente_vallejos2_g45cvi.jpg",
+            franco: "https://res.cloudinary.com/dthg9wo6r/image/upload/v1763864224/ricardo_franco_zqkg1k.jpg",
+            caceres: "https://res.cloudinary.com/dthg9wo6r/image/upload/v1763864232/sole_caceres_x9z0th.png", // ACTUALIZADO
+            curso_alusiva: "https://res.cloudinary.com/dthg9wo6r/image/upload/v1763864226/portada_tpbayj.png",
+            sandrigo: "https://res.cloudinary.com/dthg9wo6r/image/upload/v1763864225/nico_sandrigo_deammo.png",
+            muni_frente: "https://res.cloudinary.com/dthg9wo6r/image/upload/v1763864224/frentemuni_uge1fm.png",
             
-            // Logos (Si no los has subido con estos nombres, se usará el SVG de respaldo)
+            // Logos (Usan GitHub Raw o Vector SVG si fallan)
             muni_logo_main: `${GITHUB_RAW_BASE}/muni_logo.png`,
             sec_control_banner: `${GITHUB_RAW_BASE}/banner_control.png`,
             sec_control_sq: `${GITHUB_RAW_BASE}/logo_control_sq.png`,
@@ -71,7 +71,7 @@
             "ASPIRANTE (Externo)"
         ];
 
-        // Definimos ORGANIZADORES aquí antes de usarlo
+        // Definimos ORGANIZADORES
         const ORGANIZADORES = [
             { name: "Lic. Nicolás Sandrigo", role: "Secretaría de Control Público", photo: PHOTOS.sandrigo },
             { name: "Dra. Soledad Cáceres", role: "Juzgado Municipal de Faltas", photo: PHOTOS.caceres },
@@ -807,6 +807,7 @@
     </script>
 </body>
 </html>
+
 
 
 
